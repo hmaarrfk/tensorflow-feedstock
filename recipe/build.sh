@@ -66,6 +66,7 @@ fi
 
 # If you really want to see what is executed, add --subcommands
 BUILD_OPTS="
+    --subcommands
     --crosstool_top=//custom_toolchain:toolchain
     --logging=6
     --verbose_failures
@@ -116,7 +117,7 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
     export TF_CUDA_VERSION="${cuda_compiler_version}"
     export TF_CUDNN_VERSION="${cudnn}"
     export TF_NCCL_VERSION=""
-    
+
     if [[ ${cuda_compiler_version} == 10.* ]]; then
         export TF_CUDA_COMPUTE_CAPABILITIES=5.2,5.3,6.0,6.1,6.2,7.0,7.2,7.5
     elif [[ ${cuda_compiler_version} == 11.0* ]]; then
@@ -129,7 +130,7 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         echo "unsupported cuda version."
         exit 1
     fi
-    
+
     BUILD_OPTS="${BUILD_OPTS} --config=cuda --copt=-L${PREFIX}/lib --define=LIBDIR=${PREFIX}/lib --define=PREFIX=$PREFIX"
 fi
 
