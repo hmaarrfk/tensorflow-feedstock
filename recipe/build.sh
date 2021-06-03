@@ -72,6 +72,8 @@ BUILD_OPTS="
     --verbose_failures
     --config=opt
     --define=PREFIX=${PREFIX}
+    --linkopt=-L${PREFIX}/lib
+    --define=LIBDIR=${PREFIX}/lib
     --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
     --cpu=${TARGET_CPU}"
 
@@ -132,7 +134,7 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         exit 1
     fi
 
-    BUILD_OPTS="${BUILD_OPTS} --config=cuda --copt=-L${PREFIX}/lib --define=LIBDIR=${PREFIX}/lib --define=PREFIX=$PREFIX"
+    BUILD_OPTS="${BUILD_OPTS} --config=cuda"
 fi
 
 # do not build with MKL support
