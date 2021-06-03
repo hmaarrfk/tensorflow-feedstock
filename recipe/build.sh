@@ -107,28 +107,6 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
 
     export GCC_HOST_COMPILER_PATH="${GCC}"
     export GCC_HOST_COMPILER_PREFIX="$(dirname ${GCC})"
-    # June 3rd, 2021, hmaarrfk
-    # No obvious way to specify a different ld, so just link it to conda-forge's
-    # See others struggling with this
-    # https://github.com/bazelbuild/bazel/issues/8715
-    # https://github.com/tensorflow/tensorflow/issues/31083
-    ln -s ${LD} $(dirname ${LD})/ld
-    ln -s ${AR} $(dirname ${AR})/ar
-    ln -s ${AS} $(dirname ${AS})/as
-    ln -s ${CXXFILT} $(dirname ${CXXFILT})/c++filt
-    ln -s ${ELFEDIT} $(dirname ${ELFEDIT})/elfedit
-    ln -s ${GPROF} $(dirname ${GPROF})/gprof
-    ln -s ${LD_GOLD} $(dirname ${LD_GOLD})/ld.gold
-    ln -s ${LD} $(dirname ${LD})/ld
-    ln -s ${NM} $(dirname ${NM})/nm
-    ln -s ${OBJCOPY} $(dirname ${OBJCOPY})/objcopy
-    ln -s ${OBJDUMP} $(dirname ${OBJDUMP})/objdump
-    ln -s ${RANLIB} $(dirname ${RANLIB})/ranlib
-    ln -s ${READELF} $(dirname ${READELF})/readelf
-    ln -s ${SIZE} $(dirname ${SIZE})/size
-    ln -s ${STRINGS} $(dirname ${STRINGS})/strings
-    ln -s ${STRIP} $(dirname ${STRIP})/strip
-
     export CFLAGS=$(echo $CFLAGS | sed 's:-I/usr/local/cuda/include::g')
     export CPPFLAGS=$(echo $CPPFLAGS | sed 's:-I/usr/local/cuda:-isystem/usr/local/cuda:g')
     export CXXFLAGS=$(echo $CXXFLAGS | sed 's:-I/usr/local/cuda:-isystem/usr/local/cuda:g')
