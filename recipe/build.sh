@@ -107,6 +107,8 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
 
     export GCC_HOST_COMPILER_PATH="${GCC}"
     export GCC_HOST_COMPILER_PREFIX="$(dirname ${GCC})"
+    # No obvious way to specify a different ld, so just link it to conda-forge's
+    ln -s ${LD} $(dirname ${LD})/ld
     export CFLAGS=$(echo $CFLAGS | sed 's:-I/usr/local/cuda/include::g')
     export CPPFLAGS=$(echo $CPPFLAGS | sed 's:-I/usr/local/cuda:-isystem/usr/local/cuda:g')
     export CXXFLAGS=$(echo $CXXFLAGS | sed 's:-I/usr/local/cuda:-isystem/usr/local/cuda:g')
