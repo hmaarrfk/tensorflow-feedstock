@@ -26,6 +26,11 @@ requirements:
     - python                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
     - numpy 1.19.*                           # [build_platform != target_platform]
+    # June 3rd, 2021, hmaarrfk
+    # No obvious way to specify a different ld, so just link it to conda-forge's
+    # See others struggling with this
+    # https://github.com/bazelbuild/bazel/issues/8715
+    # https://github.com/tensorflow/tensorflow/issues/31083
     - binutils    # [linux]
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
