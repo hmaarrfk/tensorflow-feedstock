@@ -106,6 +106,7 @@ sed -i -e "/PREFIX/c\ " .bazelrc
 if [[ ${cuda_compiler_version} != "None" ]]; then
 
     export GCC_HOST_COMPILER_PATH="${GCC}"
+    export GCC_HOST_COMPILER_PREFIX="$(dirname ${GCC})"
     export CFLAGS=$(echo $CFLAGS | sed 's:-I/usr/local/cuda/include::g')
     export CPPFLAGS=$(echo $CPPFLAGS | sed 's:-I/usr/local/cuda:-isystem/usr/local/cuda:g')
     export CXXFLAGS=$(echo $CXXFLAGS | sed 's:-I/usr/local/cuda:-isystem/usr/local/cuda:g')
