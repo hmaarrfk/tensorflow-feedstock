@@ -128,6 +128,7 @@ outputs:
         - astunparse >=1.6.3
         - python-flatbuffers 1.12.*
         - google-pasta >=0.2
+        - google-api-core
         - h5py 2.10.*
         - keras-preprocessing >=1.1.2
         - numpy 1.19.*
@@ -149,6 +150,7 @@ outputs:
         - astunparse >=1.6.3
         - python-flatbuffers 1.12.*
         - google-pasta >=0.2
+        - google-api-core
         - h5py 2.10.*
         - keras-preprocessing >=1.1.2
         - numpy >=1.19
