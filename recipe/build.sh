@@ -110,10 +110,11 @@ export TF_CONFIGURE_IOS=0
 sed -i -e "/PROTOBUF_INCLUDE_PATH/c\ " .bazelrc
 sed -i -e "/PREFIX/c\ " .bazelrc
 
-echo CUDA_HOME is
-echo ${CUDA_HOME}
 
 if [[ ${cuda_compiler_version} != "None" ]]; then
+    # 2021/10/10 hmaarrfk: I'm not sure what CUDA_HOME
+    # Should be, but on the pytorch feedstock, it seems to fallback to this
+    export CUDA_HOME="/usr/lib/cuda"
     export GCC_HOST_COMPILER_PATH="${GCC}"
     export GCC_HOST_COMPILER_PREFIX="$(dirname ${GCC})"
     # export CFLAGS=$(echo $CFLAGS | sed 's:-I/usr/local/cuda/include::g')
