@@ -110,6 +110,72 @@ export TF_CONFIGURE_IOS=0
 sed -i -e "/PROTOBUF_INCLUDE_PATH/c\ " .bazelrc
 sed -i -e "/PREFIX/c\ " .bazelrc
 
+if [[ ${cuda_compiler_version} != "None" ]]; then
+    export GCC_HOST_COMPILER_PATH="${GCC}"
+    export GCC_HOST_COMPILER_PREFIX="$(dirname ${GCC})"
+    # export CFLAGS=$(echo $CFLAGS | sed 's:-I/usr/local/cuda/include::g')
+    # export CPPFLAGS=$(echo $CPPFLAGS | sed 's:-I/usr/local/cuda:-isystem/usr/local/cuda:g')
+    # export CXXFLAGS=$(echo $CXXFLAGS | sed 's:-I/usr/local/cuda:-isystem/usr/local/cuda:g')
+    export TF_CUDA_PATHS="${PREFIX},/usr/local/cuda-${cuda_compiler_version},/usr"
+    export CLANG_CUDA_COMPILER_PATH=${PREFIX}/bin/clang
+    export USE_CUDA=1
+    export cuda=Y
+    export TF_NEED_CUDA=1
+    export TF_CUDA_VERSION="${cuda_compiler_version}"
+    export TF_CUDNN_VERSION="${cudnn}"
+    export TF_NCCL_VERSION=$(pkg-config nccl --modversion | grep -Po '\d+\.\d+')
+    export NCCL_ROOT_DIR=$PREFIX
+    export USE_STATIC_NCCL=0
+    export USE_STATIC_CUDNN=0
+    export PATH="${CUDA_HOME}/bin:$PATH"
+    export CUDA_TOOLKIT_ROOT_DIR=$CUDA_HOME
+    export LDFLAGS="${LDFLAGS//-Wl,-z,now/-Wl,-z,lazy}"
+    export CC_OPT_FLAGS="-march=nocona -mtune=haswell"
+
+    if [[ ${cuda_compiler_version} == 10.* ]]; then
+        export TF_CUDA_COMPUTE_CAPABILITIES=5.2,5.3,6.0,6.1,6.2,7.0,7.2,7.5
+    elif [[ ${cuda_compiler_version} == 11.0* ]]; then
+        export TF_CUDA_COMPUTE_CAPABILITIES=5.2,5.3,6.0,6.1,6.2,7.0,7.2,7.5,8.0
+    elif [[ ${cuda_compiler_version} == 11.1 ]]; then
+        export TF_CUDA_COMPUTE_CAPABILITIES=5.2,5.3,6.0,6.1,6.2,7.0,7.2,7.5,8.0,8.6
+    elif [[ ${cuda_compiler_version} == 11.2 ]]; then
+        export TF_CUDA_COMPUTE_CAPABILITIES=5.2,5.3,6.0,6.1,6.2,7.0,7.2,7.5,8.0,8.6
+    else
+        echo "unsupported cuda version."
+        exit 1
+    fi
+
+    # cuda builds don't work with custom_toolchain, instead we hard-code arguments, mostly copied
+    # from https://github.com/AnacondaRecipes/tensorflow_recipes/tree/master/tensorflow-base-gpu
+    BUILD_OPTS=${BUILD_OPTS}"
+    --copt=-march=nocona
+    --copt=-mtune=haswell
+    --copt=-ftree-vectorize
+    --copt=-fPIC
+    --copt=-fstack-protector-strong
+    --copt=-O2
+    --cxxopt=-fvisibility-inlines-hidden
+    --cxxopt=-fmessage-length=0
+    --linkopt=-zrelro
+    --linkopt=-znow
+    --copt=-isystem${PREFIX}/include
+    --copt=-L${PREFIX}/lib
+    --linkopt=-L${PREFIX}/lib
+    --verbose_failures
+    --config=opt
+    --config=cuda
+    --strip=always
+    --color=yes
+    --curses=no
+    --action_env=PYTHON_BIN_PATH=${PYTHON}
+    --action_env=PYTHON_LIB_PATH=${SP_DIR}
+    --python_path=${PYTHON}
+    --copt=-DNO_CONSTEXPR_FOR_YOU=1
+    --host_copt=-DNO_CONSTEXPR_FOR_YOU=1
+    --define=LIBDIR=$PREFIX/lib
+    --define=INCLUDEDIR=$PREFIX/include"
+fi
+
 ./configure
 
 # build using bazel
