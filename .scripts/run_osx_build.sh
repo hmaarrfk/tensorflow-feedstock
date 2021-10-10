@@ -9,7 +9,7 @@ MINIFORGE_HOME=${MINIFORGE_HOME:-${HOME}/miniforge3}
 ( startgroup "Installing a fresh version of Miniforge" ) 2> /dev/null
 
 MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download"
-MINIFORGE_FILE="Miniforge3-MacOSX-$(uname -m).sh"
+MINIFORGE_FILE="Miniforge3-MacOSX-x86_64.sh"
 curl -L -O "${MINIFORGE_URL}/${MINIFORGE_FILE}"
 bash $MINIFORGE_FILE -b -p ${MINIFORGE_HOME}
 
@@ -24,7 +24,6 @@ conda activate base
 
 echo -e "\n\nInstalling conda-forge-ci-setup=3 and conda-build."
 conda install -n base --quiet --yes "conda-forge-ci-setup=3" conda-build pip ${GET_BOA:-}
-conda update --yes -c conda-forge/label/lief_dev -c conda-forge py-lief
 
 
 
