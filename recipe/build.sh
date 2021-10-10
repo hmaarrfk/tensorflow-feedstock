@@ -176,6 +176,9 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
     --define=INCLUDEDIR=$PREFIX/include"
 fi
 
+bazel clean --expunge
+bazel shutdown
+
 ./configure
 
 # build using bazel
