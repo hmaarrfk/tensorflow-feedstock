@@ -28,6 +28,7 @@ requirements:
     - numpy 1.19.*                           # [build_platform != target_platform]
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
+    - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
     - bazel
     - bazel >=4.2.1  # [osx and arm64]
     - grpc-cpp
@@ -224,7 +225,7 @@ outputs:
   - name: tensorflow
     build:
       string: cuda{{ cuda_compiler_version | replace('.', '') }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
-      string: cpu_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]  
+      string: cpu_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
     requirements:
       host:
         - python
