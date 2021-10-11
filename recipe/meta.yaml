@@ -13,7 +13,8 @@ source:
       - patches/0003-relax-precision-in-matrix_log_op_test.patch
       # requires setting GRPCIO_VERSION in build script
       - patches/0004-loosen-requirements.patch
-      - patches/0005-protobuf_3_18_comaptibility.patch
+      - patches/0005-remove_deprecated_use_of_error_message.patch
+      - patches/0006-protobuf_3_18_comaptibility.patch
   - url: https://github.com/tensorflow/estimator/archive/refs/tags/v{{ version }}.tar.gz
     sha256: 947705c60c50da0b4a8ceec1bc058aaf6bf567a7efdcd50d5173ebf6bafcf30f
     folder: tensorflow-estimator
