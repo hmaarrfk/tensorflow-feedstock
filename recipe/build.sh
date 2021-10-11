@@ -149,16 +149,6 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         echo "unsupported cuda version."
         exit 1
     fi
-
-    # cuda builds don't work with custom_toolchain, instead we hard-code arguments, mostly copied
-    # from https://github.com/AnacondaRecipes/tensorflow_recipes/tree/master/tensorflow-base-gpu
-    BUILD_OPTS=${BUILD_OPTS}"
-    --config=cuda
-    --curses=no
-    --action_env=PYTHON_BIN_PATH=${PYTHON}
-    --action_env=PYTHON_LIB_PATH=${SP_DIR}
-    --python_path=${PYTHON}
-"
 fi
 
 bazel clean --expunge
