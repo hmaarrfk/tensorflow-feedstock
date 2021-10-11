@@ -153,32 +153,12 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
     # cuda builds don't work with custom_toolchain, instead we hard-code arguments, mostly copied
     # from https://github.com/AnacondaRecipes/tensorflow_recipes/tree/master/tensorflow-base-gpu
     BUILD_OPTS=${BUILD_OPTS}"
-    --copt=-march=nocona
-    --copt=-mtune=haswell
-    --copt=-ftree-vectorize
-    --copt=-fPIC
-    --copt=-fstack-protector-strong
-    --copt=-O2
-    --cxxopt=-fvisibility-inlines-hidden
-    --cxxopt=-fmessage-length=0
-    --linkopt=-zrelro
-    --linkopt=-znow
-    --copt=-isystem${PREFIX}/include
-    --copt=-L${PREFIX}/lib
-    --linkopt=-L${PREFIX}/lib
-    --verbose_failures
-    --config=opt
     --config=cuda
-    --strip=always
-    --color=yes
     --curses=no
     --action_env=PYTHON_BIN_PATH=${PYTHON}
     --action_env=PYTHON_LIB_PATH=${SP_DIR}
     --python_path=${PYTHON}
-    --copt=-DNO_CONSTEXPR_FOR_YOU=1
-    --host_copt=-DNO_CONSTEXPR_FOR_YOU=1
-    --define=LIBDIR=$PREFIX/lib
-    --define=INCLUDEDIR=$PREFIX/include"
+"
 fi
 
 bazel clean --expunge
