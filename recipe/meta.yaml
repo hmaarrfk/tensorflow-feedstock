@@ -42,8 +42,6 @@ requirements:
     - rsync  # [linux]
     - coreutils  # [cuda_compiler_version != "None"]
     - binutils   # [cuda_compiler_version != "None"]
-    - clang      # [cuda_compiler_version != "None"]
-    - clangdev   # [cuda_compiler_version != "None"]
   host:
     # GPU requirements for CUDA
     - cudnn      # [cuda_compiler_version != "None"]
