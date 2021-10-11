@@ -21,7 +21,8 @@ build:
   number: 1
   skip: true  # [win]
   # Remove this when we are done
-  skip: true  # [cuda_compiler_version != "11.2"]
+  skip: true  # [not linux]
+  skip: true  # [(cuda_compiler_version != "11.2") and (cuda_compiler_version != "None")]
   skip: true  # [py!=39]
 
 requirements:
