@@ -210,6 +210,9 @@ outputs:
     requirements:
       host:
         - python
+        # This ensures that a consistent version of openssl is chosen between
+        # all packages.
+        - openssl
         - {{ pin_subpackage('tensorflow-base', exact=True) }}
       run:
         - python
