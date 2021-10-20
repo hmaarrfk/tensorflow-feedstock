@@ -22,6 +22,10 @@ source:
 build:
   number: 1
   skip: true  # [win]
+  # Remove this when we are done
+  skip: true  # [not linux]
+  skip: true  # [(cuda_compiler_version != "11.2") and (cuda_compiler_version != "None")]
+  skip: true  # [py!=39]
 
 requirements:
   build:
@@ -30,14 +34,20 @@ requirements:
     - numpy 1.19.*                           # [build_platform != target_platform]
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - bazel
+    - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
+    - bazel 3        # [not (osx and arm64)]
     - bazel >=4.2.1  # [osx and arm64]
     - grpc-cpp
     - libprotobuf
     - nasm
     - sed
     - rsync  # [linux]
+    - coreutils  # [cuda_compiler_version != "None"]
+    - binutils   # [cuda_compiler_version != "None"]
   host:
+    # GPU requirements for CUDA
+    - cudnn      # [cuda_compiler_version != "None"]
+    - nccl       # [cuda_compiler_version != "None"]
     # conda build requirements
     - python
     - pip
@@ -94,6 +104,8 @@ outputs:
     script: build_pkg.sh  # [not win]
     script: build_pkg.bat  # [win]
     build:
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
+      string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
       entry_points:
         - toco_from_protos = tensorflow.lite.toco.python.toco_from_protos:main
         - tflite_convert = tensorflow.lite.python.tflite_convert:main
@@ -108,7 +120,11 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
       host:
+        # GPU reuqirements
+        - cudnn                   # [cuda_compiler_version != "None"]
+        - nccl                    # [cuda_compiler_version != "None"]
         # conda build requirements
         - python
         - pip
@@ -186,13 +202,22 @@ outputs:
   - name: tensorflow-estimator
     script: build_estimator.sh   # [not win]
     script: build_estimator.bat  # [win]
+    build:
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
+      string: cpu_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
     requirements:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
-        - bazel
+        - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
+        - coreutils  # [cuda_compiler_version != "None"]
+        - binutils   # [cuda_compiler_version != "None"]
+        - bazel 3        # [not (osx and arm64)]
         - bazel >=4.2.1  # [osx and arm64]
       host:
+        # GPU requirements for CUDA
+        - cudnn      # [cuda_compiler_version != "None"]
+        - nccl       # [cuda_compiler_version != "None"]
         - python
         - pip
         - setuptools
@@ -213,6 +238,9 @@ outputs:
 
 
   - name: tensorflow
+    build:
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
+      string: cpu_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
     requirements:
       host:
         - python
@@ -236,14 +264,23 @@ outputs:
   - name: libtensorflow
     script: cp_libtensorflow.sh
     build:
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
+      string: cpu_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
+      skip: true  # [cuda_compiler_version != "None"]
       skip: true  # [not linux]
     requirements:
       # build requirements needs to pick up the compiler run_exports
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
+        - coreutils  # [cuda_compiler_version != "None"]
+        - binutils   # [cuda_compiler_version != "None"]
       # host requirements to pick up run_exports
       host:
+        # GPU requirements for CUDA
+        - cudnn      # [cuda_compiler_version != "None"]
+        - nccl       # [cuda_compiler_version != "None"]
         - giflib
         - grpc-cpp
         - icu
@@ -269,14 +306,23 @@ outputs:
   - name: libtensorflow_cc
     script: cp_libtensorflow_cc.sh
     build:
+      string: cuda{{ cuda_compiler_version | replace('.', '') }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
+      string: cpu_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
+      skip: true  # [cuda_compiler_version != "None"]
       skip: true  # [not linux]
     requirements:
       # build requirements needs to pick up the compiler run_exports
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
+        - coreutils  # [cuda_compiler_version != "None"]
+        - binutils   # [cuda_compiler_version != "None"]
       # host requirements to pick up run_exports
       host:
+        # GPU requirements for CUDA
+        - cudnn      # [cuda_compiler_version != "None"]
+        - nccl       # [cuda_compiler_version != "None"]
         - giflib
         - grpc-cpp
         - icu
