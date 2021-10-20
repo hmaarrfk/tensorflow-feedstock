@@ -44,6 +44,8 @@ requirements:
     - rsync  # [linux]
     - coreutils  # [cuda_compiler_version != "None"]
     - binutils   # [cuda_compiler_version != "None"]
+    - clang      # [cuda_compiler_version != "None"]
+    - clangdev   # [cuda_compiler_version != "None"]
   host:
     # GPU requirements for CUDA
     - cudnn      # [cuda_compiler_version != "None"]
@@ -212,6 +214,8 @@ outputs:
         - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
         - coreutils  # [cuda_compiler_version != "None"]
         - binutils   # [cuda_compiler_version != "None"]
+        - clang      # [cuda_compiler_version != "None"]
+        - clangdev   # [cuda_compiler_version != "None"]
         - bazel 3        # [not (osx and arm64)]
         - bazel >=4.2.1  # [osx and arm64]
       host:
@@ -276,6 +280,8 @@ outputs:
         - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
         - coreutils  # [cuda_compiler_version != "None"]
         - binutils   # [cuda_compiler_version != "None"]
+        - clang      # [cuda_compiler_version != "None"]
+        - clangdev   # [cuda_compiler_version != "None"]
       # host requirements to pick up run_exports
       host:
         # GPU requirements for CUDA
@@ -318,6 +324,8 @@ outputs:
         - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
         - coreutils  # [cuda_compiler_version != "None"]
         - binutils   # [cuda_compiler_version != "None"]
+        - clang      # [cuda_compiler_version != "None"]
+        - clangdev   # [cuda_compiler_version != "None"]
       # host requirements to pick up run_exports
       host:
         # GPU requirements for CUDA
