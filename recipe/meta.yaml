@@ -2,7 +2,7 @@
 {% set estimator_version = "2.6.0" %}
 
 package:
-  name: tensorflow-split
+  name: tensorflow-base
   version: {{ version }}
 
 source:
@@ -27,6 +27,17 @@ source:
 build:
   number: 2
   skip: true  # [win]
+  string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
+  string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
+  entry_points:
+    - toco_from_protos = tensorflow.lite.toco.python.toco_from_protos:main
+    - tflite_convert = tensorflow.lite.python.tflite_convert:main
+    - toco = tensorflow.lite.python.tflite_convert:main
+    - saved_model_cli = tensorflow.python.tools.saved_model_cli:main
+    # The tensorboard package adds this entry point.
+    # - tensorboard = tensorboard.main:run_main
+    - tf_upgrade_v2 = tensorflow.tools.compatibility.tf_upgrade_v2_main:main
+    - estimator_ckpt_converter = tensorflow_estimator.python.estimator.tools.checkpoint_converter:main
 
 requirements:
   build:
@@ -109,111 +120,47 @@ requirements:
     # upstream wants exact pin for gast
     - gast ==0.4.0
     # TF-API needs to move in sync
+    # But tensorflow 2.7 requires tensorboard 2.6.
+    - tensorboard >=2.6,<2.7
+    - keras >=2.7,<2.8
+  run:
+    - python
+    - absl-py >=0.10,<1
+    - astunparse >=1.6.3,<1.7
+    - python-flatbuffers >=1.12,<2
+    - google-pasta >=0.2,<1
+    - grpcio {{ grpc_cpp }}.*
+    - h5py >=3.1.0,<3.2
+    - keras-preprocessing >=1.1.2,<1.2
+    - numpy >=1.19.2,<1.20
+    - opt_einsum >=3.3,<3.4
+    - protobuf >=3.9.2
+    - six >=1.15,<1.16
+    - termcolor >=1.1,<1.2
+    - typing_extensions >=3.7.4,<3.8
+    - wheel >=0.35,<1
+    - wrapt >=1.12.1,<1.13
+    # upstream wants exact pin for gast
+    - gast ==0.4.0
+    # TF-API needs to move in sync
     - tensorboard >=2.6,<2.7
     - keras >=2.6,<2.7
+    # avoid that people without GPUs needlessly download ~0.5-1GB
+    - __cuda  # [cuda_compiler_version != "None"]
+test:
+  files:
+    - test_tensorflow_base.py
+  commands:
+    - cat test_tensorflow_base.py   # [unix]
+    - python test_tensorflow_base.py
+    - tf_upgrade_v2 --help
+    - saved_model_cli --help
+    - tflite_convert --help     # [not win]
+    - toco_from_protos --help   # [not win]
+    - toco --help               # [not win]
 
 outputs:
   - name: tensorflow-base
-    script: build_pkg.sh  # [not win]
-    script: build_pkg.bat  # [win]
-    build:
-      string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
-      string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
-      entry_points:
-        - toco_from_protos = tensorflow.lite.toco.python.toco_from_protos:main
-        - tflite_convert = tensorflow.lite.python.tflite_convert:main
-        - toco = tensorflow.lite.python.tflite_convert:main
-        - saved_model_cli = tensorflow.python.tools.saved_model_cli:main
-        # The tensorboard package adds this entry point.
-        # - tensorboard = tensorboard.main:run_main
-        - tf_upgrade_v2 = tensorflow.tools.compatibility.tf_upgrade_v2_main:main
-        - estimator_ckpt_converter = tensorflow_estimator.python.estimator.tools.checkpoint_converter:main
-    requirements:
-      # build requirements needs to pick up the compiler run_exports
-      build:
-        - {{ compiler('c') }}
-        - {{ compiler('cxx') }}
-        - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
-      host:
-        # GPU reuqirements
-        - cudnn                   # [cuda_compiler_version != "None"]
-        - nccl                    # [cuda_compiler_version != "None"]
-        # conda build requirements
-        - python
-        - pip
-        # TF_SYSTEM_LIBS
-        - astor >=0.7.1
-        - cython >=0.28.4
-        - dill >=0.3.1.1
-        - giflib
-        - grpc-cpp
-        - flatbuffers
-        - icu
-        - jpeg
-        - libcurl
-        - libpng
-        - libprotobuf
-        - openssl
-        - pybind11
-        - snappy
-        - sqlite
-        - zlib
-        # requirements specified by the package itself
-        - absl-py >=0.10,<1
-        - astunparse >=1.6.3,<1.7
-        - python-flatbuffers >=1.12,<2
-        - google-pasta >=0.2,<1
-        - h5py >=3.1.0,<3.2
-        - keras-preprocessing >=1.1.2,<1.2
-        - numpy >=1.19.2,<1.20
-        - opt_einsum >=3.3,<3.4
-        - protobuf >=3.9.2
-        - six >=1.15,<1.16
-        - termcolor >=1.1,<1.2
-        - typing_extensions >=3.7.4,<3.8
-        - wheel >=0.35,<1
-        - wrapt >=1.12.1,<1.13
-        # upstream wants exact pin for gast
-        - gast ==0.4.0
-        # TF-API needs to move in sync
-        - tensorboard >=2.6,<2.7
-        - keras >=2.6,<2.7
-      run:
-        - python
-        - absl-py >=0.10,<1
-        - astunparse >=1.6.3,<1.7
-        - python-flatbuffers >=1.12,<2
-        - google-pasta >=0.2,<1
-        - grpcio {{ grpc_cpp }}.*
-        - h5py >=3.1.0,<3.2
-        - keras-preprocessing >=1.1.2,<1.2
-        - numpy >=1.19.2,<1.20
-        - opt_einsum >=3.3,<3.4
-        - protobuf >=3.9.2
-        - six >=1.15,<1.16
-        - termcolor >=1.1,<1.2
-        - typing_extensions >=3.7.4,<3.8
-        - wheel >=0.35,<1
-        - wrapt >=1.12.1,<1.13
-        # upstream wants exact pin for gast
-        - gast ==0.4.0
-        # TF-API needs to move in sync
-        - tensorboard >=2.6,<2.7
-        - keras >=2.6,<2.7
-        # avoid that people without GPUs needlessly download ~0.5-1GB
-        - __cuda  # [cuda_compiler_version != "None"]
-    test:
-      files:
-        - test_tensorflow_base.py
-      commands:
-        - cat test_tensorflow_base.py   # [unix]
-        - python test_tensorflow_base.py
-        - tf_upgrade_v2 --help
-        - saved_model_cli --help
-        - tflite_convert --help     # [not win]
-        - toco_from_protos --help   # [not win]
-        - toco --help               # [not win]
-
   - name: tensorflow-estimator
     script: build_estimator.sh   # [not win]
     script: build_estimator.bat  # [win]
