@@ -28,11 +28,68 @@ build:
   number: 2
   skip: true  # [win]
 
+{%- set host_dependencies = [] %}
+# conda build requirements
+{%- set host_dependencies = host_dependencies + ["pip"] %}
+{%- set host_dependencies = host_dependencies + ["zlib"] %}
+{%- set host_dependencies = host_dependencies + ["libpng"] %}
+{%- set host_dependencies = host_dependencies + ["libcurl"] %}
+{%- set host_dependencies = host_dependencies + ["openjdk >=8"] %}
+{%- set host_dependencies = host_dependencies + ["nsync"] %}
+# TF_SYSTEM_LIBS, see usage in
+# https://github.com/tensorflow/tensorflow/blob/v{{ version }}/third_party/systemlibs/syslibs_configure.bzl
+# their versions are specified in
+# https://github.com/tensorflow/tensorflow/blob/v{{ version }}/tensorflow/workspace2.bzl
+# but so far there have been no problems with leaving these
+# unpinned; though some restrictions come in for packages
+# that are also listed as a requirement for the pip_package.
+{%- set host_dependencies = host_dependencies + ["astor >=0.7.1"] %}
+{%- set host_dependencies = host_dependencies + ["cython >=0.28.4"] %}
+{%- set host_dependencies = host_dependencies + ["dill >=0.3.1.1"] %}
+{%- set host_dependencies = host_dependencies + ["giflib"] %}
+{%- set host_dependencies = host_dependencies + ["grpc-cpp"] %}
+{%- set host_dependencies = host_dependencies + ["flatbuffers"] %}
+{%- set host_dependencies = host_dependencies + ["icu"] %}
+{%- set host_dependencies = host_dependencies + ["jpeg"] %}
+{%- set host_dependencies = host_dependencies + ["libpng"] %}
+{%- set host_dependencies = host_dependencies + ["libprotobuf"] %}
+{%- set host_dependencies = host_dependencies + ["openssl"] %}
+{%- set host_dependencies = host_dependencies + ["pybind11"] %}
+{%- set host_dependencies = host_dependencies + ["sqlite"] %}
+{%- set host_dependencies = host_dependencies + ["snappy"] %}
+{%- set host_dependencies = host_dependencies + ["zlib"] %}
+# requirements specified by the package itself, see
+# github.com/tensorflow/tensorflow/blob/v{{ version }}/tensorflow/tools/pip_package/setup.py
+{%- set host_dependencies = host_dependencies + ["absl-py >=0.10,<1"] %}
+{%- set host_dependencies = host_dependencies + ["astunparse >=1.6.3,<1.7"] %}
+{%- set host_dependencies = host_dependencies + ["python-flatbuffers >=1.12,<2"] %}
+{%- set host_dependencies = host_dependencies + ["google-pasta >=0.2,<1"] %}
+{%- set host_dependencies = host_dependencies + ["h5py >=3.1.0,<3.2"] %}
+{%- set host_dependencies = host_dependencies + ["keras-preprocessing >=1.1.2,<1.2"] %}
+{%- set host_dependencies = host_dependencies + ["opt_einsum >=3.3,<3.4"] %}
+{%- set host_dependencies = host_dependencies + ["protobuf >=3.9.2"] %}
+# 2021/12/05: hmaarrfk
+# While tensorflow has an upper bound on six
+# six has been highly backward compatible
+# We remove the upper bound so that we can be more compatible with
+# The rest of the conda-forge ecosystem
+{%- set host_dependencies = host_dependencies + ["six >=1.15"] %}
+{%- set host_dependencies = host_dependencies + ["termcolor >=1.1,<1.2"] %}
+{%- set host_dependencies = host_dependencies + ["typing_extensions >=3.7.4,<3.8"] %}
+{%- set host_dependencies = host_dependencies + ["wheel >=0.35,<1"] %}
+{%- set host_dependencies = host_dependencies + ["wrapt >=1.12.1,<1.13"] %}
+# upstream wants exact pin for gast"] %}
+{%- set host_dependencies = host_dependencies + ["gast ==0.4.0"] %}
+# TF-API needs to move in sync"] %}
+{%- set host_dependencies = host_dependencies + ["tensorboard >=2.6,<2.7"] %}
+{%- set host_dependencies = host_dependencies + ["keras >=2.6,<2.7"] %}
+
+
 requirements:
   build:
     - python                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - numpy 1.19.*                           # [build_platform != target_platform]
+    - numpy 1.19                             # [build_platform != target_platform]
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
@@ -50,67 +107,16 @@ requirements:
     # GPU requirements for CUDA
     - cudnn      # [cuda_compiler_version != "None"]
     - nccl       # [cuda_compiler_version != "None"]
-    # conda build requirements
     - python
-    - pip
-    - zlib
-    - libpng
-    - libcurl
-    - curl         # [win]
-    - unzip        # [not win]
-    - zip          # [not win]
-    - m2-unzip     # [win]
-    - m2-zip       # [win]
-    - openjdk >=8
-    - nsync
-    # TF_SYSTEM_LIBS, see usage in
-    # https://github.com/tensorflow/tensorflow/blob/v{{ version }}/third_party/systemlibs/syslibs_configure.bzl
-    # their versions are specified in
-    # https://github.com/tensorflow/tensorflow/blob/v{{ version }}/tensorflow/workspace2.bzl
-    # but so far there have been no problems with leaving these
-    # unpinned; though some restrictions come in for packages
-    # that are also listed as a requirement for the pip_package.
-    - astor >=0.7.1
-    - cython >=0.28.4
-    - dill >=0.3.1.1
-    - giflib
-    - grpc-cpp
-    - flatbuffers
-    - icu
-    - jpeg
-    - libpng
-    - libprotobuf
-    - openssl
-    - pybind11
-    - sqlite
-    - snappy
-    - zlib
-    # requirements specified by the package itself, see
-    # github.com/tensorflow/tensorflow/blob/v{{ version }}/tensorflow/tools/pip_package/setup.py
-    - absl-py >=0.10,<1
-    - astunparse >=1.6.3,<1.7
-    - python-flatbuffers >=1.12,<2
-    - google-pasta >=0.2,<1
-    - h5py >=3.1.0,<3.2
-    - keras-preprocessing >=1.1.2,<1.2
-    - numpy 1.19.*
-    - opt_einsum >=3.3,<3.4
-    - protobuf >=3.9.2
-    # 2021/12/05: hmaarrfk
-    # While tensorflow has an upper bound on six
-    # six has been highly backward compatible
-    # We remove the upper bound so that we can be more compatible with
-    # The rest of the conda-forge ecosystem
-    - six >=1.15
-    - termcolor >=1.1,<1.2
-    - typing_extensions >=3.7.4,<3.8
-    - wheel >=0.35,<1
-    - wrapt >=1.12.1,<1.13
-    # upstream wants exact pin for gast
-    - gast ==0.4.0
-    # TF-API needs to move in sync
-    - tensorboard >=2.6,<2.7
-    - keras >=2.6,<2.7
+    - numpy 1.19
+    {%- for dependency in host_dependencies %}
+    - {{ dependency }}
+    {%- endfor %}
+    - curl       # [win]
+    - unzip      # [not win]
+    - zip        # [not win]
+    - m2-unzip   # [win]
+    - m2-zip     # [win]
 
 outputs:
   - name: tensorflow-base
@@ -135,49 +141,19 @@ outputs:
         - {{ compiler('cxx') }}
         - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
       host:
-        # GPU reuqirements
-        - cudnn                   # [cuda_compiler_version != "None"]
-        - nccl                    # [cuda_compiler_version != "None"]
-        # conda build requirements
+        # GPU requirements for CUDA
+        - cudnn      # [cuda_compiler_version != "None"]
+        - nccl       # [cuda_compiler_version != "None"]
         - python
-        - pip
-        # TF_SYSTEM_LIBS
-        - astor >=0.7.1
-        - cython >=0.28.4
-        - dill >=0.3.1.1
-        - giflib
-        - grpc-cpp
-        - flatbuffers
-        - icu
-        - jpeg
-        - libcurl
-        - libpng
-        - libprotobuf
-        - openssl
-        - pybind11
-        - snappy
-        - sqlite
-        - zlib
-        # requirements specified by the package itself
-        - absl-py >=0.10,<1
-        - astunparse >=1.6.3,<1.7
-        - python-flatbuffers >=1.12,<2
-        - google-pasta >=0.2,<1
-        - h5py >=3.1.0,<3.2
-        - keras-preprocessing >=1.1.2,<1.2
-        - numpy >=1.19.2,<1.20
-        - opt_einsum >=3.3,<3.4
-        - protobuf >=3.9.2
-        - six >=1.15,<1.16
-        - termcolor >=1.1,<1.2
-        - typing_extensions >=3.7.4,<3.8
-        - wheel >=0.35,<1
-        - wrapt >=1.12.1,<1.13
-        # upstream wants exact pin for gast
-        - gast ==0.4.0
-        # TF-API needs to move in sync
-        - tensorboard >=2.6,<2.7
-        - keras >=2.6,<2.7
+        - numpy 1.19
+        {%- for dependency in host_dependencies %}
+        - {{ dependency }}
+        {%- endfor %}
+        - curl       # [win]
+        - unzip      # [not win]
+        - zip        # [not win]
+        - m2-unzip   # [win]
+        - m2-zip     # [win]
       run:
         - python
         - absl-py >=0.10,<1
