@@ -8,4 +8,5 @@ remote_ci_setup_channels:
   - conda-forge
 remote_ci_setup:
   - conda-forge-ci-setup=3
-  - py-lief>=0.12
+  - conda-forge/label/lief_dev::py-lief
+  - conda-forge/label/lief_dev::lief
