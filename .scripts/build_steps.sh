@@ -29,9 +29,12 @@ conda-build:
 CONDARC
 
 
-mamba install --update-specs --yes --quiet "conda-forge-ci-setup=3" conda-build pip boa -c conda-forge
-mamba update --update-specs --yes --quiet "conda-forge-ci-setup=3" conda-build pip boa -c conda-forge
-mamba update --update-specs --yes --quiet -c conda-forge/label/lief_dev -c conda-forge py-lief
+mamba install --update-specs --yes --quiet \
+    conda-build pip boa conda-forge-ci-setup=3 "py-lief>=0.12" \
+     --channel conda-forge/label/lief_dev --channel conda-forge
+mamba update --update-specs --yes --quiet \
+    conda-build pip boa conda-forge-ci-setup=3 "py-lief>=0.12" \
+     --channel conda-forge/label/lief_dev --channel conda-forge
 
 # set up the condarc
 setup_conda_rc "${FEEDSTOCK_ROOT}" "${RECIPE_ROOT}" "${CONFIG_FILE}"
