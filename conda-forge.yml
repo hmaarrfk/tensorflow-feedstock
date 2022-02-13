@@ -3,3 +3,9 @@ build_platform:
 conda_forge_output_validation: true
 provider:
   win: azure
+remote_ci_setup_channels:
+  - conda-forge/label/lief_dev
+  - conda-forge
+remote_ci_setup:
+  - conda-forge-ci-setup=3
+  - py-lief>=0.12
