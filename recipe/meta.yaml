@@ -17,6 +17,7 @@ source:
       # Slated for 2.9.0 release
       # https://github.com/tensorflow/tensorflow/commit/613bcf9f92750bebf88b5f119da8bce83acb4b47
       - patches/0008-Remove_dependency_on_implementation_ofRepeatedField_iterator.patch
+      - patches/0009-Remove_dependency_on_implementation_ofRepeatedField_iterator.patch
   - url: https://github.com/tensorflow/estimator/archive/refs/tags/v{{ version }}.tar.gz
     sha256: e5164e802638d3cf110ecc17912be9d514a9d3354ec48e77200b9403dcc15965
     folder: tensorflow-estimator
