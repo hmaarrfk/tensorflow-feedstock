@@ -3,3 +3,22 @@
 # available on 10.13
 MACOSX_SDK_VERSION:        # [osx and x86_64]
   - "10.13"                # [osx and x86_64]
+
+
+# 2022/04/25
+# Manually downgrade osx to compiler version 11 (instead of 13)
+# Manually downgrade linux max compiler version to 9 (instead of 10)
+c_compiler_version:            # [unix]
+  - 11                         # [osx]
+  - 9                          # [linux]
+  - 7                          # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux64]
+  - 9                          # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux64]
+  - 9                          # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux64]
+  - 9                          # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux64]
+cxx_compiler_version:          # [unix]
+  - 11                         # [osx]
+  - 9                          # [linux]
+  - 7                          # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux64]
+  - 9                          # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux64]
+  - 9                          # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux64]
+  - 9                          # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux64]
