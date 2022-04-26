@@ -17,9 +17,9 @@ cxx_compiler_version:
 giflib:
 - '5.2'
 grpc_cpp:
-- '1.42'
+- '1.45'
 icu:
-- '69'
+- '70'
 jpeg:
 - '9'
 libcurl:
@@ -27,7 +27,7 @@ libcurl:
 libpng:
 - '1.6'
 libprotobuf:
-- '3.19'
+- '3.20'
 macos_machine:
 - arm64-apple-darwin20.0.0
 numpy:
