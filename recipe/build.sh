@@ -21,7 +21,6 @@ export INCLUDEDIR=$PREFIX/include
 
 # Exceptions and TODOs:
 # Needs a bazel build:
-# com_google_absl
 # Build failures in tensorflow/core/platform/s3/aws_crypto.cc
 # boringssl (i.e. system openssl)
 # Most importantly: Write a patch that uses system LLVM libs for sure as well as MLIR and oneDNN/mkldnn
@@ -32,6 +31,7 @@ export INCLUDEDIR=$PREFIX/include
 # Needs c++17, try on linux
 #  com_googlesource_code_re2
 export TF_SYSTEM_LIBS="
+  com_google_absl
   absl_py
   astor_archive
   astunparse_archive
