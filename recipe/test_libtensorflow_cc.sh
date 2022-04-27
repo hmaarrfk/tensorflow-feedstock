@@ -2,5 +2,8 @@
 
 set -exuo pipefail
 
-$CXX -std=c++14 -o test_cc -L${PREFIX}/lib/ -ltensorflow_cc -ltensorflow_framework -lrt -I${PREFIX}/include/ test_cc.cc
+if [[ "${target_platform}" == linux-* ]]; then
+  export LDFLAGS="${LDFLAGS} -lrt"
+fi
+${CXX} ${CXXFLAGS} ${LDFLAGS} -o test_cc test_cc.cc -ltensorflow_cc -ltensorflow_framework
 ./test_cc
