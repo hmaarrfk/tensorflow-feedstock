@@ -61,6 +61,7 @@ export BAZEL_MKL_OPT=""
 
 mkdir -p ./bazel_output_base
 export BAZEL_OPTS=""
+export BAZEL_CXXOPTS="-std=c++17"
 export CC_OPT_FLAGS="${CFLAGS}"
 
 # Quick debug:
