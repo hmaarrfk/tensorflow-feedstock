@@ -60,7 +60,7 @@ export TF_NEED_MKL=0
 export BAZEL_MKL_OPT=""
 
 mkdir -p ./bazel_output_base
-export BAZEL_OPTS="--config=c++1z"
+export BAZEL_OPTS=""
 export CC_OPT_FLAGS="${CFLAGS}"
 
 # Quick debug:
@@ -93,6 +93,9 @@ BUILD_OPTS="
 
 if [[ "${target_platform}" == "osx-arm64" ]]; then
   BUILD_OPTS="${BUILD_OPTS} --config=macos_arm64"
+fi
+if [[ "${target_platform}" == linux* ]]; then
+  BUILD_OPTS="${BUILD_OPTS} --config=c++1z"
 fi
 export TF_ENABLE_XLA=0
 export BUILD_TARGET="//tensorflow/tools/pip_package:build_pip_package //tensorflow/tools/lib_package:libtensorflow //tensorflow:libtensorflow_cc.so"
