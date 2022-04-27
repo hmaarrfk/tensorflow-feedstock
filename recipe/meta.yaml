@@ -73,6 +73,7 @@ requirements:
     # but so far there have been no problems with leaving these
     # unpinned; though some restrictions come in for packages
     # that are also listed as a requirement for the pip_package.
+    - abseil-cpp
     - astor
     - cython
     - dill
@@ -154,6 +155,7 @@ outputs:
         - astor
         - cython
         - dill
+        - abseil-cpp
         - giflib
         - grpc-cpp
         - flatbuffers 2.0.0
@@ -304,6 +306,7 @@ outputs:
         - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
       # host requirements to pick up run_exports
       host:
+        - abseil-cpp
         - giflib
         - grpc-cpp
         - icu
@@ -348,6 +351,7 @@ outputs:
         - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
       # host requirements to pick up run_exports
       host:
+        - abseil-cpp
         - giflib
         - grpc-cpp
         - icu
