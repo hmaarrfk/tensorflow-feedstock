@@ -23,6 +23,10 @@ build:
   number: 0
   skip: true  # [win]
   skip: true  # [python_impl == 'pypy']
+  # Tensorflow still hasn't updated from C++14.
+  # Newer versions of abseil_cpp require C++17
+  # This may be a possibility in 2.9.0
+  skip: true  # [abseil_cpp != '20210324.2']
 
 requirements:
   build:
@@ -65,7 +69,7 @@ requirements:
     # but so far there have been no problems with leaving these
     # unpinned; though some restrictions come in for packages
     # that are also listed as a requirement for the pip_package.
-    - abseil-cpp 20210324.2
+    - abseil-cpp
     - astor
     - cython
     - dill
@@ -144,7 +148,7 @@ outputs:
         - pip
         - wheel
         # TF_SYSTEM_LIBS
-        - abseil-cpp 20210324.2
+        - abseil-cpp
         - astor
         - cython
         - dill
