@@ -21,7 +21,7 @@ build:
   number: 0
   skip: true  # [win]
   skip: true  # [python_impl == 'pypy']
-  skip: true  # [libabseil != '20220623.0']
+  skip: true  # [cuda_compiler_version == "10.2"]
 
 requirements:
   build:
@@ -40,6 +40,8 @@ requirements:
     - numpy                                  # [build_platform != target_platform]
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
+    - gcc_linux-64 10.3.0                    # [liux64 and cuda_compiler_version == "11.1"]
+    - gxx_linux-64 10.3.0                    # [liux64 and cuda_compiler_version == "11.1"]
     - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
     - bazel >=5.2.0
     - grpc-cpp
@@ -143,6 +145,8 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - gcc_linux-64 10.3.0                    # [liux64 and cuda_compiler_version == "11.1"]
+        - gxx_linux-64 10.3.0                    # [liux64 and cuda_compiler_version == "11.1"]
         - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
       host:
         # GPU reuqirements
@@ -265,6 +269,8 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - gcc_linux-64 10.3.0                    # [liux64 and cuda_compiler_version == "11.1"]
+        - gxx_linux-64 10.3.0                    # [liux64 and cuda_compiler_version == "11.1"]
         # Keep the cuda compiler here since it helps package solvers
         # decide on the cuda variant
         # https://github.com/conda-forge/tensorflow-feedstock/issues/162
@@ -304,6 +310,8 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - gcc_linux-64 10.3.0                    # [liux64 and cuda_compiler_version == "11.1"]
+        - gxx_linux-64 10.3.0                    # [liux64 and cuda_compiler_version == "11.1"]
         # Keep the cuda compiler here since it helps package solvers
         # decide on the cuda variant
         # https://github.com/conda-forge/tensorflow-feedstock/issues/162
@@ -349,6 +357,8 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
+        - gcc_linux-64 10.3.0                    # [liux64 and cuda_compiler_version == "11.1"]
+        - gxx_linux-64 10.3.0                    # [liux64 and cuda_compiler_version == "11.1"]
         # Keep the cuda compiler here since it helps package solvers
         # decide on the cuda variant
         # https://github.com/conda-forge/tensorflow-feedstock/issues/162
