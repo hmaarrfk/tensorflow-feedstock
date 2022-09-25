@@ -22,6 +22,7 @@ build:
   skip: true  # [win]
   skip: true  # [python_impl == 'pypy']
   skip: true  # [cuda_compiler_version == "10.2"]
+  skip: true  # [py!=39]
 
 requirements:
   build:
