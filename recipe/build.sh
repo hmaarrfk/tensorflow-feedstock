@@ -105,7 +105,8 @@ if [[ "${target_platform}" == "osx-arm64" ]]; then
   # See https://conda-forge.org/docs/maintainer/knowledge_base.html#newer-c-features-with-old-sdk
   export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
 fi
-export TF_ENABLE_XLA=1
+# We believe that XLA is causing some slowdowns and increased memory usage
+export TF_ENABLE_XLA=0
 export BUILD_TARGET="//tensorflow/tools/pip_package:build_pip_package //tensorflow/tools/lib_package:libtensorflow //tensorflow:libtensorflow_cc${SHLIB_EXT}"
 
 # Python settings
