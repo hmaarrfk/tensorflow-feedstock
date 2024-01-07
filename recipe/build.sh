@@ -113,6 +113,11 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         echo "unsupported cuda version."
         exit 1
     fi
+
+    # hmaarrfk: 20240106
+    # Bad bad bad. I can't figure out for the life of me why abseil 202308 can't compile itself
+    sed -i 's/CheckArity<sizeof...\(C\), sizeof...\(Args\)>();/true;/' ${PREFIX}/include/absl/strings/internal/str_format/bind.h
+    sed -i 's/CheckMatches<C...>(absl::make_index_sequence<sizeof...\(C\)>{})/true;/' ${PREFIX}/include/absl/strings/internal/str_format/bind.h
 else
     export TF_NEED_CUDA=0
 fi
