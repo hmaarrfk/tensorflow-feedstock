@@ -246,5 +246,5 @@ rm -rf $PREFIX/include/python
 # This logic should be safe to keep in even when the underlying issue is resolved
 # https://github.com/conda-forge/cuda-nvcc-impl-feedstock/issues/9
 if [[ -x ${BUILD_PREFIX}/nvvm/bin/cicc ]]; then
-    rf ${BUILD_PREFIX}/bin/cicc
+    rm ${BUILD_PREFIX}/bin/cicc
 fi
