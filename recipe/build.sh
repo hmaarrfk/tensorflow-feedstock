@@ -151,7 +151,11 @@ export TF_ENABLE_XLA=1
 
 # We need to tell xla to find things in our prefix, not some other location
 # See https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-2423371916
-sed -i '\|opts\.set_xla_gpu_cuda_data_dir(|s|^\([[:space:]]*\).*|\1opts.set_xla_gpu_cuda_data_dir("'"${PREFIX}"'"),|' third_party/xla/xla/debug_options_flags.cc
+sed -i.bak '\|^#define TF_CUDA_TOOLKIT_PATH|c\#define TF_CUDA_TOOLKIT_PATH "'"${PREFIX}"'"' third_party/gpus/cuda/cuda_config.h.tpl
+rm -f third_party/gpus/cuda/cuda_config.h.tpl
+
+sed -i.bak '\|^#define TF_CUDA_TOOLKIT_PATH|c\#define TF_CUDA_TOOLKIT_PATH "'"${PREFIX}"'"' third_party/xla/third_party/tsl/third_party/gpus/cuda/cuda_config.h.tpl
+rm -f third_party/xla/third_party/tsl/third_party/gpus/cuda/cuda_config.h.tpl.bak
 
 export BUILD_TARGET="//tensorflow/tools/pip_package:wheel //tensorflow/tools/lib_package:libtensorflow //tensorflow:libtensorflow_cc${SHLIB_EXT}"
 
