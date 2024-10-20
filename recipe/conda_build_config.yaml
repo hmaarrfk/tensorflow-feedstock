@@ -1,2 +1,32 @@
 github_actions_labels:
 - cirun-openstack-cpu-xlarge
+
+c_compiler_version:            # [linux]
+  - 13                         # [linux]
+  - 11                         # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux]
+  - 12                         # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux]
+  - 12                         # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux]
+c_stdlib_version:              # [unix]
+  - 2.17                       # [linux]
+  - 2.17                       # [linux and os.environ.get("CF_CUDA_ENABLED", "False") == "True"]
+  - 2.17                       # [linux and os.environ.get("CF_CUDA_ENABLED", "False") == "True"]
+  - 2.17                       # [linux and os.environ.get("CF_CUDA_ENABLED", "False") == "True"]
+cxx_compiler_version:          # [linux]
+  - 13                         # [linux]
+  - 11                         # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux]
+  - 12                         # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux]
+fortran_compiler_version:      # [linux]
+  - 13                         # [linux]
+  - 11                         # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux]
+  - 12                         # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux]
+  - 12                         # [os.environ.get("CF_CUDA_ENABLED", "False") == "True" and linux]
+
+cuda_compiler:
+  - None
+  - nvcc                       # [(linux or win64) and os.environ.get("CF_CUDA_ENABLED", "False") == "True"]
+  - cuda-nvcc                  # [(linux or win64) and os.environ.get("CF_CUDA_ENABLED", "False") == "True"]
+cuda_compiler_version:
+  - None
+  - 11.8                       # [(linux or win64) and os.environ.get("CF_CUDA_ENABLED", "False") == "True"]
+  - 12.0                       # [(linux or win64) and os.environ.get("CF_CUDA_ENABLED", "False") == "True"]
+  - 12.6                       # [(linux or win64) and os.environ.get("CF_CUDA_ENABLED", "False") == "True"]
