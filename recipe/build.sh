@@ -110,10 +110,10 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         # find and replace is only valid for that
         # We need to tell xla to find things in our prefix, not some other location
         # See https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-2423371916
-        sed -i.bak '\|^#define TF_CUDA_TOOLKIT_PATH|c\#define TF_CUDA_TOOLKIT_PATH "'"${PREFIX}"'"' third_party/gpus/cuda/cuda_config.h.tpl
+        sed -i.bak '\|^#define TF_CUDA_TOOLKIT_PATH|c\#define TF_CUDA_TOOLKIT_PATH "'"${PREFIX}/targets/x86_64-linux"'"' third_party/gpus/cuda/cuda_config.h.tpl
         rm -f third_party/gpus/cuda/cuda_config.h.tpl.bak
 
-        sed -i.bak '\|^#define TF_CUDA_TOOLKIT_PATH|c\#define TF_CUDA_TOOLKIT_PATH "'"${PREFIX}"'"' third_party/xla/third_party/tsl/third_party/gpus/cuda/cuda_config.h.tpl
+        sed -i.bak '\|^#define TF_CUDA_TOOLKIT_PATH|c\#define TF_CUDA_TOOLKIT_PATH "'"${PREFIX}/targets/x86_64-linux"'"' third_party/xla/third_party/tsl/third_party/gpus/cuda/cuda_config.h.tpl
         rm -f third_party/xla/third_party/tsl/third_party/gpus/cuda/cuda_config.h.tpl.bak
 
         export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
