@@ -2,7 +2,6 @@
 
 set -exuo pipefail
 
-
 pushd tensorflow-estimator
 
 WHEEL_DIR=${PWD}/wheel_dir
@@ -15,4 +14,3 @@ bazel-bin/tensorflow_estimator/tools/pip_package/build_pip_package ${WHEEL_DIR}
 ${PYTHON} -m pip install --no-deps ${WHEEL_DIR}/*.whl
 bazel clean
 popd
-
