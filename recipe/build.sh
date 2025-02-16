@@ -105,10 +105,6 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
     export LDFLAGS="${LDFLAGS//-Wl,-z,now/-Wl,-z,lazy}"
     export CC_OPT_FLAGS="-march=nocona -mtune=haswell"
 
-    # https://github.com/tensorflow/tensorflow/pull/86413#issuecomment-2648797177
-    # Disable the use of HERMETIC_CUDA
-    echo "build --config=cuda_wheel" >> .bazelrc
-
     export TF_CUDA_COMPUTE_CAPABILITIES=sm_35,sm_50,sm_60,sm_62,sm_70,sm_72,sm_75,sm_80,sm_86,sm_87,sm_89,sm_90,compute_90
     export TF_CUDA_PATHS="${PREFIX},${CUDA_HOME}"
     # export HERMETIC_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
@@ -168,7 +164,11 @@ sed -i -e "/PREFIX/c\ " .bazelrc
 # Ensure .bazelrc ends in a newline
 echo "" >> .bazelrc
 
-if [[ "${target_platform}" == "osx-arm64" ]]; then
+if [[ ${cuda_compiler_version} != "None" ]]; then
+    # https://github.com/tensorflow/tensorflow/pull/86413#issuecomment-2648797177
+    # Disable the use of HERMETIC_CUDA
+    echo "build --config=cuda_wheel" >> .bazelrc
+elif [[ "${target_platform}" == "osx-arm64" ]]; then
   echo "build --config=macos_arm64" >> .bazelrc
   # See https://conda-forge.org/docs/maintainer/knowledge_base.html#newer-c-features-with-old-sdk
   export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
