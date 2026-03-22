@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mark Harfouche <mark.harfouche@gmail.com>
+Date: Sat, 22 Mar 2026 00:00:00 +0000
+Subject: [PATCH] Qualify llvm::cast/llvm::isa in dtensor mlir (Eigen clash)
+
+tensorflow/core/framework/shape_inference.h pulls Eigen; unqualified
+cast<> / isa<> in dtensor mlir .cc files is parsed as Eigen and breaks GCC.
+---
+ tensorflow/dtensor/mlir/shape_utils.cc    | 3 ++-
+ tensorflow/dtensor/mlir/spmd_expansion.cc | 4 ++--
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/tensorflow/dtensor/mlir/shape_utils.cc b/tensorflow/dtensor/mlir/shape_utils.cc
+index 1111111111..2222222222 100644
+--- a/tensorflow/dtensor/mlir/shape_utils.cc
++++ b/tensorflow/dtensor/mlir/shape_utils.cc
+@@ -73,7 +73,8 @@ StatusOr<llvm::ArrayRef<int64_t>> ExtractGlobalInputShape(
+         return errors::Internal("global_shape does not have static rank");
+       return *global_shape;
+     }
+-    return ExtractGlobalOutputShape(cast<mlir::OpResult>(input_value.get()));
++    return ExtractGlobalOutputShape(
++        llvm::cast<mlir::OpResult>(input_value.get()));
+   }
+ 
+   // If we reach this point, we're working with a function argument.
+diff --git a/tensorflow/dtensor/mlir/spmd_expansion.cc b/tensorflow/dtensor/mlir/spmd_expansion.cc
+index 1111111111..2222222222 100644
+--- a/tensorflow/dtensor/mlir/spmd_expansion.cc
++++ b/tensorflow/dtensor/mlir/spmd_expansion.cc
+@@ -188,7 +188,7 @@ bool GetResourceArgIndexIfUsedInAssignmentOp(
+           GetForwardedDTensorLayoutInput(assign_variable_op.getResource());
+       if (llvm::isa<mlir::BlockArgument>(resource)) {
+         *resource_argument_index_for_assign_variable =
+-            cast<mlir::BlockArgument>(resource).getArgNumber();
++            llvm::cast<mlir::BlockArgument>(resource).getArgNumber();
+         return true;
+       }
+     }
+@@ -221,7 +221,7 @@ mlir::LogicalResult UpdateFunctionArgsUsingLayout(mlir::func::FuncOp function) {
+ 
+     // If argument is a resource type update the subtype shape information
+     // to reflect local shape of resources.
+-    if (isa<mlir::TF::ResourceType>(arg_type)) {
++    if (llvm::isa<mlir::TF::ResourceType>(arg_type)) {
+       if (mlir::failed(UpdateResourceArgumentType(argument_index, function)))
+         return mlir::failure();
+       continue;

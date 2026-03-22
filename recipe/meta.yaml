@@ -70,6 +70,7 @@ source:
       - patches/0041-Omit-absl_flags-linkopt-for-conda-libabseil.patch
       - patches/0042-Force-system-snappy-to-link-with-no-as-needed.patch
       - patches/0043-Force-system-curl-to-link-with-no-as-needed.patch
+      - patches/0044-Qualify-llvm-cast-in-dtensor-shape_utils.patch
       # these came from https://git.yoctoproject.org/meta-tensorflow/tree/recipes-framework/tensorflow/files
       # check every release there for patches in the future
       # - patches/0033-third_party-ducc-fix-ambiguous-failure.patch

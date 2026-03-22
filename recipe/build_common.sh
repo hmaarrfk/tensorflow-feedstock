@@ -274,6 +274,24 @@ if [[ "${target_platform}" == linux-* ]] && ! grep -qF 'host_linkopt=-lcurl' .ba
   echo "build --linkopt=-lcurl" >> .bazelrc
   echo "build --linkopt=-Wl,--pop-state" >> .bazelrc
 fi
+if [[ "${target_platform}" == linux-* ]] && ! grep -qF 'host_linkopt=-labsl_vlog_config_internal' .bazelrc; then
+  echo "build --host_linkopt=-Wl,--push-state" >> .bazelrc
+  echo "build --host_linkopt=-Wl,--no-as-needed" >> .bazelrc
+  echo "build --host_linkopt=-labsl_vlog_config_internal" >> .bazelrc
+  echo "build --host_linkopt=-labsl_log_internal_conditions" >> .bazelrc
+  echo "build --host_linkopt=-labsl_log_internal_check_op" >> .bazelrc
+  echo "build --host_linkopt=-labsl_log_internal_message" >> .bazelrc
+  echo "build --host_linkopt=-labsl_log_internal_nullguard" >> .bazelrc
+  echo "build --host_linkopt=-Wl,--pop-state" >> .bazelrc
+  echo "build --linkopt=-Wl,--push-state" >> .bazelrc
+  echo "build --linkopt=-Wl,--no-as-needed" >> .bazelrc
+  echo "build --linkopt=-labsl_vlog_config_internal" >> .bazelrc
+  echo "build --linkopt=-labsl_log_internal_conditions" >> .bazelrc
+  echo "build --linkopt=-labsl_log_internal_check_op" >> .bazelrc
+  echo "build --linkopt=-labsl_log_internal_message" >> .bazelrc
+  echo "build --linkopt=-labsl_log_internal_nullguard" >> .bazelrc
+  echo "build --linkopt=-Wl,--pop-state" >> .bazelrc
+fi
 
 # Update TF lite schema with latest flatbuffers version
 pushd tensorflow/compiler/mlir/lite/schema

@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: 1080
     strategy:
       fail-fast: false
+      max-parallel: 50
       matrix:
         include:
           - CONFIG: linux_64_cuda_compiler_version12.8microarch_level1
