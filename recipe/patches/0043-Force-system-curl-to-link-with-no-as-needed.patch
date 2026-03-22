@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mark Harfouche <mark.harfouche@gmail.com>
+Date: Sat, 22 Mar 2026 00:00:00 +0000
+Subject: [PATCH] Force -lcurl with --no-as-needed for conda linkers
+
+Same as snappy: conda linkers may drop DT_NEEDED for libcurl; genrule
+tools loading libtensorflow_framework.so then fail on curl_free.
+---
+ third_party/systemlibs/curl.BUILD | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/third_party/systemlibs/curl.BUILD b/third_party/systemlibs/curl.BUILD
+index 1111111111..2222222222 100644
+--- a/third_party/systemlibs/curl.BUILD
++++ b/third_party/systemlibs/curl.BUILD
+@@ -8,5 +8,10 @@ cc_library(
+ cc_library(
+     name = "curl",
+-    linkopts = ["-lcurl"],
++    linkopts = [
++        "-Wl,--push-state",
++        "-Wl,--no-as-needed",
++        "-lcurl",
++        "-Wl,--pop-state",
++    ],
+     visibility = ["//visibility:public"],
+ )

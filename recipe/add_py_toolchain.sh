@@ -13,6 +13,8 @@ ${PYTHON} "\$@"
 EOF
 chmod +x python.shebang
 
+if ! grep -qF 'extra_toolchains=//py_toolchain:py_toolchain' .bazelrc; then
 cat >> .bazelrc <<EOF
 build --extra_toolchains=//py_toolchain:py_toolchain
 EOF
+fi

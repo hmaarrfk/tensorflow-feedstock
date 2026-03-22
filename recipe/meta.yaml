@@ -58,8 +58,18 @@ source:
       - patches/0028-Support-cuda-12.8.patch
       - patches/0029-Disable-profiler.patch
       - patches/0030-cross-arch-config.patch  # [aarch64 and target_platform != build_platform]
-      - patches/0031-Force-python-wheel-architecture-to-aarch64.patch  # [aarch64 and target_platform != build_platform]
+      - patches/0031-Force-python-wheel-architecture-to-aarch64-When-cros.patch  # [aarch64 and target_platform != build_platform]
       - patches/0032-Restore-system-link-files-for-absl.patch
+      - patches/0033-Vendor-grpc-bazel-for-system-gRPC.patch
+      - patches/0034-Vendor-protobuf-bazel-for-system.patch
+      - patches/0036-System-grpcio-py_library-stub-for-external-repo.patch
+      - patches/0037-Use-root-grpc-plugin-targets-for-system-gRPC.patch
+      - patches/0038-protobuf-python-BUILD-python_toolchain.patch
+      - patches/0039-Add-absl-base-no_destructor-for-systemlibs.patch
+      - patches/0040-Add-absl-functional-overload-for-systemlibs.patch
+      - patches/0041-Omit-absl_flags-linkopt-for-conda-libabseil.patch
+      - patches/0042-Force-system-snappy-to-link-with-no-as-needed.patch
+      - patches/0043-Force-system-curl-to-link-with-no-as-needed.patch
       # these came from https://git.yoctoproject.org/meta-tensorflow/tree/recipes-framework/tensorflow/files
       # check every release there for patches in the future
       # - patches/0033-third_party-ducc-fix-ambiguous-failure.patch
@@ -75,7 +85,7 @@ build:
   skip: true  # [osx]
   # TODO: debug issues with CUDA cross-compilation
   skip: true  # [aarch64 and cuda_compiler_version != "None"]
-  skip: true  # [cuda_compiler_version != "None" or microarch_level != 1]
+  # skip: true  # [cuda_compiler_version != "None" or microarch_level != 1]
 
 requirements:
   build:
@@ -99,7 +109,7 @@ requirements:
     - {{ compiler('cxx') }}
     - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
     - x86_64-microarch-level  {{ microarch_level }}  # [linux and x86_64]
-    - bazel 6.*
+    - bazel >=7.4.1,<8
     - bazel-toolchain
     - bazel-toolchain <0.3                   # [osx]
     - libgrpc

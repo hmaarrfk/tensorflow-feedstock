@@ -4,19 +4,20 @@ Date: Fri, 6 Feb 2026 00:55:09 +0000
 Subject: [PATCH 04/31] Fix protobuf_python for systemlibs
 
 ---
- tensorflow/workspace2.bzl                  | 5 +++++
+ tensorflow/workspace2.bzl                  | 6 ++++++
  third_party/systemlibs/protobuf_python.bzl | 5 +++++
- 2 files changed, 10 insertions(+)
+ 2 files changed, 11 insertions(+)
  create mode 100644 third_party/systemlibs/protobuf_python.bzl
 
 diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
 index 9e49ab40b25..1f0ff1b11fd 100644
 --- a/tensorflow/workspace2.bzl
 +++ b/tensorflow/workspace2.bzl
-@@ -396,6 +396,11 @@ def _tf_repositories():
+@@ -396,6 +396,12 @@ def _tf_repositories():
  
      tf_http_archive(
          name = "com_google_protobuf",
++        system_build_file = "//third_party/systemlibs:protobuf.BUILD",
 +	system_link_files = {
 +            "//third_party/systemlibs:protobuf.bzl": "protobuf.bzl",
 +            "//third_party/systemlibs:protobuf_deps.bzl": "protobuf_deps.bzl",

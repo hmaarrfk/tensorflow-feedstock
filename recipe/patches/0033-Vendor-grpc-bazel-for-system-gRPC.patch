@@ -1,0 +1,3682 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mark Harfouche <mark.harfouche@gmail.com>
+Date: Sat, 22 Mar 2026 00:00:00 +0000
+Subject: [PATCH 33/33] Vendor gRPC 1.68.2 bazel/ for TF_SYSTEM_LIBS gRPC
+
+When com_github_grpc_grpc uses system_build_file, Bazel still loads Starlark
+from @com_github_grpc_grpc//bazel/*. Symlink the upstream gRPC 1.68.2 bazel
+tree (matching workspace2) into the external repo; grpc_deps.bzl and
+grpc_extra_deps.bzl are no-ops so workspace hooks do not fetch deps.
+---
+
+diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
+--- a/tensorflow/workspace2.bzl
++++ b/tensorflow/workspace2.bzl
+@@ -461,8 +461,38 @@ def _tf_repositories():
+         name = "com_github_grpc_grpc",
+         sha256 = "afbc5d78d6ba6d509cc6e264de0d49dcd7304db435cbf2d630385bacf49e066c",
+         strip_prefix = "grpc-1.68.2",
+         system_build_file = "//third_party/systemlibs:grpc.BUILD",
++        system_link_files = {
++            "//third_party/systemlibs/grpc_conda_bazel/platforms/android:BUILD": "bazel/platforms/android/BUILD",
++            "//third_party/systemlibs/grpc_conda_bazel:BUILD": "bazel/BUILD",
++            "//third_party/systemlibs/grpc_conda_bazel:_gevent_test_main.py": "bazel/_gevent_test_main.py",
++            "//third_party/systemlibs/grpc_conda_bazel:_logging_threshold_test_main.py": "bazel/_logging_threshold_test_main.py",
++            "//third_party/systemlibs/grpc_conda_bazel:_single_module_tester.py": "bazel/_single_module_tester.py",
++            "//third_party/systemlibs/grpc_conda_bazel:cc_grpc_library.bzl": "bazel/cc_grpc_library.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:copts.bzl": "bazel/copts.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:custom_exec_properties.bzl": "bazel/custom_exec_properties.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:cython_library.bzl": "bazel/cython_library.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:experiments.bzl": "bazel/experiments.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:generate_cc.bzl": "bazel/generate_cc.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:generate_objc.bzl": "bazel/generate_objc.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:gevent_test.bzl": "bazel/gevent_test.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:googleapis.BUILD": "bazel/googleapis.BUILD",
++            "//third_party/systemlibs/grpc_conda_bazel:grpc_build_system.bzl": "bazel/grpc_build_system.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:grpc_deps.bzl": "bazel/grpc_deps.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:grpc_extra_deps.bzl": "bazel/grpc_extra_deps.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:grpc_python_deps.bzl": "bazel/grpc_python_deps.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:grpc_util.bzl": "bazel/grpc_util.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:internal_python_rules.bzl": "bazel/internal_python_rules.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:logging_threshold_test.bzl": "bazel/logging_threshold_test.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:objc_grpc_library.bzl": "bazel/objc_grpc_library.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:protobuf.bzl": "bazel/protobuf.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:python_rules.bzl": "bazel/python_rules.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:rules_go.patch": "bazel/rules_go.patch",
++            "//third_party/systemlibs/grpc_conda_bazel:supported_versions.txt": "bazel/supported_versions.txt",
++            "//third_party/systemlibs/grpc_conda_bazel:test_experiments.bzl": "bazel/test_experiments.bzl",
++            "//third_party/systemlibs/grpc_conda_bazel:update_mirror.sh": "bazel/update_mirror.sh",
++        },
+         patch_file = [
+             "@local_xla//third_party/grpc:grpc.patch",
+         ],
+         urls = tf_mirror_urls("https://github.com/grpc/grpc/archive/refs/tags/v1.68.2.tar.gz"),
+diff --git a/third_party/systemlibs/grpc_conda_bazel/BUILD b/third_party/systemlibs/grpc_conda_bazel/BUILD
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/BUILD
+@@ -0,0 +1,36 @@
++# Copyright 2017 gRPC authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""
++Contains build targets used by Starlark files in the bazel/ directory.
++"""
++
++licenses(["notice"])
++
++package(default_visibility = ["//:__subpackages__"])
++
++filegroup(
++    name = "_single_module_tester",
++    srcs = ["_single_module_tester.py"],
++)
++
++filegroup(
++    name = "_gevent_test_main",
++    srcs = ["_gevent_test_main.py"],
++)
++
++filegroup(
++    name = "_logging_threshold_test_main",
++    srcs = ["_logging_threshold_test_main.py"],
++)
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/_gevent_test_main.py b/third_party/systemlibs/grpc_conda_bazel/_gevent_test_main.py
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/_gevent_test_main.py
+@@ -0,0 +1,102 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import gevent
++from gevent import monkey
++
++monkey.patch_all()
++threadpool = gevent.hub.get_hub().threadpool
++
++# Currently, each channel corresponds to a single native thread in the
++# gevent threadpool. Thus, when the unit test suite spins up hundreds of
++# channels concurrently, some will be starved out, causing the test to
++# increase in duration. We increase the max size here so this does not
++# happen.
++threadpool.maxsize = 1024
++threadpool.size = 32
++
++import traceback, signal
++from typing import Sequence
++
++
++import grpc.experimental.gevent
++grpc.experimental.gevent.init_gevent()
++
++import gevent
++import greenlet
++import datetime
++
++import grpc
++import unittest
++import sys
++import os
++import pkgutil
++import importlib
++
++def trace_callback(event, args):
++    if event in ("switch", "throw"):
++        origin, target = args
++        sys.stderr.write("{} Transfer from {} to {} with {}\n".format(datetime.datetime.now(), origin, target, event))
++    else:
++        sys.stderr.write("Unknown event {}.\n".format(event))
++    sys.stderr.flush()
++
++if os.getenv("GREENLET_TRACE") is not None:
++    greenlet.settrace(trace_callback)
++
++def debug(sig, frame):
++    d={'_frame':frame}
++    d.update(frame.f_globals)
++    d.update(frame.f_locals)
++
++    sys.stderr.write("Traceback:\n{}".format("\n".join(traceback.format_stack(frame))))
++    import gevent.util; gevent.util.print_run_info()
++    sys.stderr.flush()
++
++signal.signal(signal.SIGTERM, debug)
++
++
++class SingleLoader(object):
++    def __init__(self, pattern: str):
++        loader = unittest.TestLoader()
++        self.suite = unittest.TestSuite()
++        tests = []
++        for importer, module_name, is_package in pkgutil.walk_packages([os.path.dirname(os.path.relpath(__file__))]):
++            if pattern in module_name:
++                spec = importer.find_spec(module_name)
++                module = importlib.util.module_from_spec(spec)
++                spec.loader.exec_module(module)
++                tests.append(loader.loadTestsFromModule(module))
++        if len(tests) != 1:
++            raise AssertionError("Expected only 1 test module. Found {}".format(tests))
++        self.suite.addTest(tests[0])
++
++
++    def loadTestsFromNames(self, names: Sequence[str], module: str = None) -> unittest.TestSuite:
++        return self.suite
++
++if __name__ == "__main__":
++
++    if len(sys.argv) != 2:
++        print(f"USAGE: {sys.argv[0]} TARGET_MODULE", file=sys.stderr)
++
++    target_module = sys.argv[1]
++
++    loader = SingleLoader(target_module)
++    runner = unittest.TextTestRunner()
++
++    result = gevent.spawn(runner.run, loader.suite)
++    result.join()
++    if not result.value.wasSuccessful():
++        sys.exit("Test failure.")
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/_logging_threshold_test_main.py b/third_party/systemlibs/grpc_conda_bazel/_logging_threshold_test_main.py
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/_logging_threshold_test_main.py
+@@ -0,0 +1,93 @@
++# Copyright 2024 gRPC authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++import os
++import re
++import subprocess
++import sys
++import tempfile
++
++_OK_TEST_REGEX = r"^-+.*Ran ([\d]+) tests* in ([\d.]+)s.*OK(?: \(skipped=(\d+)\))?\n$"
++
++# Tests with known exception logs.
++# TODO(sourabhsinghs): Investigate and enable _rpc_part_1_test and _rpc_part_2_test tests.
++_SKIP_TESTS = [
++    "_rpc_part_1_test",
++    "_server_shutdown_test",
++    "_xds_credentials_test",
++    "_server_test",
++    "_invalid_metadata_test",
++    "_reconnect_test",
++    "_channel_close_test",
++    "_rpc_part_2_test",
++    "_invocation_defects_test",
++    "_dynamic_stubs_test",
++    "_channel_connectivity_test",
++]
++
++if __name__ == "__main__":
++    if len(sys.argv) != 3:
++        print(f"USAGE: {sys.argv[0]} TARGET_MODULE", file=sys.stderr)
++        sys.exit(1)
++
++    test_script = sys.argv[1]
++    target_module = sys.argv[2]
++
++    if target_module in _SKIP_TESTS:
++        print(f"Skipping {target_module}")
++        sys.exit(0)
++
++    command = [
++        sys.executable,
++        os.path.realpath(test_script),
++        target_module,
++        os.path.dirname(os.path.relpath(__file__)),
++    ]
++
++    with tempfile.TemporaryFile(mode="w+") as stdout_file:
++        with tempfile.TemporaryFile(mode="w+") as stderr_file:
++            result = subprocess.run(
++                command,
++                stdout=stdout_file,
++                stderr=stderr_file,
++                text=True,
++                check=True,
++            )
++
++            stdout_file.seek(0)
++            stderr_file.seek(0)
++
++            stdout_count = len(stdout_file.readlines())
++            stderr_count = len(stderr_file.readlines())
++
++            if result.returncode != 0:
++                sys.exit("Test failure")
++
++            stderr_file.seek(0)
++            if not re.fullmatch(_OK_TEST_REGEX, stderr_file.read(), re.DOTALL):
++                print(
++                    f"Warning: Excessive error output detected ({stderr_count} lines):"
++                )
++                stderr_file.seek(0)
++                for line in stderr_file:
++                    print(line)
++
++            if stdout_count > 0:
++                print(
++                    f"Warning: Unexpected output detected ({stdout_count} lines):"
++                )
++                stdout_file.seek(0)
++                for line in stdout_file:
++                    print(line)
++
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/_single_module_tester.py b/third_party/systemlibs/grpc_conda_bazel/_single_module_tester.py
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/_single_module_tester.py
+@@ -0,0 +1,54 @@
++# Copyright 2024 gRPC authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++from typing import Sequence, Optional
++
++import unittest
++import sys
++import pkgutil
++
++
++class SingleLoader(object):
++    def __init__(self, pattern: str, unittest_path: str):
++        loader = unittest.TestLoader()
++        self.suite = unittest.TestSuite()
++        tests = []
++
++        for importer, module_name, is_package in pkgutil.walk_packages([unittest_path]):
++            if pattern in module_name:
++                module = importer.find_module(module_name).load_module(module_name)
++                tests.append(loader.loadTestsFromModule(module))
++        if len(tests) != 1:            
++            raise AssertionError("Expected only 1 test module. Found {}".format(tests))
++        self.suite.addTest(tests[0])
++
++    def loadTestsFromNames(self, names: Sequence[str], module: Optional[str] = None) -> unittest.TestSuite:
++        return self.suite
++
++if __name__ == "__main__":
++
++    if len(sys.argv) != 3:
++        print(f"USAGE: {sys.argv[0]} TARGET_MODULE", file=sys.stderr)
++        sys.exit(1)
++
++
++    target_module = sys.argv[1]
++    unittest_path = sys.argv[2]
++
++    loader = SingleLoader(target_module, unittest_path)
++    runner = unittest.TextTestRunner(verbosity=0)
++    result = runner.run(loader.suite)
++    
++    if not result.wasSuccessful():
++        sys.exit("Test failure.")
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/cc_grpc_library.bzl b/third_party/systemlibs/grpc_conda_bazel/cc_grpc_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/cc_grpc_library.bzl
+@@ -0,0 +1,123 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""Generates and compiles C++ grpc stubs from proto_library rules."""
++
++load("@rules_proto//proto:defs.bzl", "proto_library")
++load("//bazel:generate_cc.bzl", "generate_cc")
++load("//bazel:protobuf.bzl", "well_known_proto_libs")
++
++def cc_grpc_library(
++        name,
++        srcs,
++        deps,
++        proto_only = False,
++        well_known_protos = False,
++        generate_mocks = False,
++        use_external = False,
++        grpc_only = False,
++        **kwargs):
++    """Generates C++ grpc classes for services defined in a proto file.
++
++    If grpc_only is True, this rule is compatible with proto_library and
++    cc_proto_library native rules such that it expects proto_library target
++    as srcs argument and generates only grpc library classes, expecting
++    protobuf messages classes library (cc_proto_library target) to be passed in
++    deps argument. By default grpc_only is False which makes this rule to behave
++    in a backwards-compatible mode (trying to generate both proto and grpc
++    classes).
++
++    Assumes the generated classes will be used in cc_api_version = 2.
++
++    Args:
++        name (str): Name of rule.
++        srcs (list): A single .proto file which contains services definitions,
++          or if grpc_only parameter is True, a single proto_library which
++          contains services descriptors.
++        deps (list): A list of C++ proto_library (or cc_proto_library) which
++          provides the compiled code of any message that the services depend on.
++        proto_only (bool): If True, create only C++ proto classes library,
++          avoid creating C++ grpc classes library (expect it in deps).
++          Deprecated, use native cc_proto_library instead. False by default.
++        well_known_protos (bool): Should this library additionally depend on
++          well known protos. Deprecated, the well known protos should be
++          specified as explicit dependencies of the proto_library target
++          (passed in srcs parameter) instead. False by default.
++        generate_mocks (bool): when True, Google Mock code for client stub is
++          generated. False by default.
++        use_external (bool): Not used.
++        grpc_only (bool): if True, generate only grpc library, expecting
++          protobuf messages library (cc_proto_library target) to be passed as
++          deps. False by default (will become True by default eventually).
++        **kwargs: rest of arguments, e.g., compatible_with and visibility
++    """
++    if len(srcs) > 1:
++        fail("Only one srcs value supported", "srcs")
++    if grpc_only and proto_only:
++        fail("A mutualy exclusive configuration is specified: grpc_only = True and proto_only = True")
++
++    plugin_flags = kwargs.pop("plugin_flags", [])
++    codegen_flags = kwargs.pop("flags", []) + plugin_flags
++
++    extra_deps = []
++    proto_targets = []
++
++    if not grpc_only:
++        proto_target = "_" + name + "_only"
++        cc_proto_target = name if proto_only else "_" + name + "_cc_proto"
++
++        proto_deps = ["_" + dep + "_only" for dep in deps if dep.find(":") == -1]
++        proto_deps += [dep.split(":")[0] + ":" + "_" + dep.split(":")[1] + "_only" for dep in deps if dep.find(":") != -1 and dep.find("com_google_googleapis") == -1]
++        proto_deps += [dep for dep in deps if dep.find("com_google_googleapis") != -1]
++        if well_known_protos:
++            proto_deps += well_known_proto_libs()
++        proto_library(
++            name = proto_target,
++            srcs = srcs,
++            deps = proto_deps,
++            **kwargs
++        )
++
++        native.cc_proto_library(
++            name = cc_proto_target,
++            deps = [":" + proto_target],
++            **kwargs
++        )
++        extra_deps.append(":" + cc_proto_target)
++        proto_targets.append(proto_target)
++    else:
++        if not srcs:
++            fail("srcs cannot be empty", "srcs")
++        proto_targets += srcs
++
++    if not proto_only:
++        codegen_grpc_target = "_" + name + "_grpc_codegen"
++        generate_cc(
++            name = codegen_grpc_target,
++            srcs = proto_targets,
++            plugin = "@com_github_grpc_grpc//src/compiler:grpc_cpp_plugin",
++            well_known_protos = well_known_protos,
++            generate_mocks = generate_mocks,
++            flags = codegen_flags,
++            **kwargs
++        )
++
++        native.cc_library(
++            name = name,
++            srcs = [":" + codegen_grpc_target],
++            hdrs = [":" + codegen_grpc_target],
++            deps = deps +
++                   extra_deps +
++                   ["@com_github_grpc_grpc//:grpc++_codegen_proto"],
++            **kwargs
++        )
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/copts.bzl b/third_party/systemlibs/grpc_conda_bazel/copts.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/copts.bzl
+@@ -0,0 +1,163 @@
++# Copyright 2021 the gRPC authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""
++Includes default copts.
++"""
++
++# This is a list of llvm flags to be used when being built with use_strict_warning=1
++GRPC_LLVM_WARNING_FLAGS = [
++    # Enable all & extra warnings
++    "-Wall",
++    "-Wextra",
++    # Avoid some known traps
++    "-Wimplicit-fallthrough",
++    # Consider warnings as errors
++    "-Werror",
++    # Ignore unknown warning flags
++    "-Wno-unknown-warning-option",
++    # A list of enabled flags coming from internal build system
++    "-Wc++20-extensions",
++    "-Wctad-maybe-unsupported",
++    "-Wdeprecated-increment-bool",
++    "-Wfloat-overflow-conversion",
++    "-Wfloat-zero-conversion",
++    "-Wfor-loop-analysis",
++    "-Wformat-security",
++    "-Wgnu-redeclared-enum",
++    "-Winfinite-recursion",
++    "-Wliteral-conversion",
++    "-Wnon-virtual-dtor",
++    "-Woverloaded-virtual",
++    "-Wself-assign",
++    "-Wstring-conversion",
++    "-Wtautological-overlap-compare",
++    "-Wthread-safety-analysis",
++    "-Wthread-safety-beta",
++    "-Wunused-but-set-variable",
++    "-Wunused-comparison",
++    "-Wvla",
++    # -Wextra compatibility between gcc and clang
++    "-Wtype-limits",
++    # A list of disabled flags coming from internal build system
++    "-Wno-string-concatenation",
++    # Exceptions but will be removed
++    "-Wno-deprecated-declarations",
++    "-Wno-unused-function",
++]
++
++GRPC_LLVM_WINDOWS_WARNING_FLAGS = GRPC_LLVM_WARNING_FLAGS + [
++    ### Some checks that are missing with clang-cl
++    "-Wthread-safety",
++    "-Wreorder-ctor",
++
++    ### Avoid some checks that are default on clang-cl
++    "-Wno-c++98-compat-pedantic",
++    "-Wno-missing-prototypes",
++    "-Wno-thread-safety-precise",  # too many aliases
++
++    # abseil offenses
++    "-Wno-comma",
++    "-Wno-deprecated-redundant-constexpr-static-def",
++    "-Wno-deprecated",  # remove when the above works in all clang versions we test with
++    "-Wno-float-equal",
++    "-Wno-gcc-compat",
++    "-Wno-reserved-identifier",
++    "-Wno-thread-safety-negative",
++    "-Wno-sign-compare",
++
++    # re2 offenses
++    "-Wno-zero-as-null-pointer-constant",
++
++    # ares offenses
++    "-Wno-macro-redefined",
++
++    # protobuf offenses
++    "-Wno-cast-align",
++    "-Wno-inconsistent-missing-destructor-override",
++
++    # xxhash offenses
++    "-Wno-disabled-macro-expansion",
++
++    # benchmark offenses
++    "-Wno-shift-sign-overflow",
++
++    # Evidently nodiscard is inappropriately pinned as a C++17 feature
++    "-Wno-c++17-attribute-extensions",
++
++    # declarations are not used in many places
++    "-Wno-missing-variable-declarations",
++
++    # TODO: delete iomgr
++    "-Wno-old-style-cast",
++    "-Wno-cast-qual",
++    "-Wno-unused-member-function",
++    "-Wno-unused-template",
++
++    # TODO(hork): see if the TraceFlag offense can be removed
++    "-Wno-global-constructors",
++    # TODO(hork): clean up EE offenses
++    "-Wno-missing-field-initializers",
++    "-Wno-non-virtual-dtor",
++    "-Wno-thread-safety-reference-return",
++
++    # TODO(ctiller): offense: dump_args. signed to unsigned
++    "-Wno-sign-conversion",
++    "-Wno-shorten-64-to-32",
++
++    # TODO: general cleanup required. Maybe new developer or rainy day projects.
++    "-Wno-unreachable-code-break",
++    "-Wno-unreachable-code-return",
++    "-Wno-unreachable-code",
++    "-Wno-used-but-marked-unused",
++    "-Wno-newline-eof",
++    "-Wno-unused-const-variable",
++    "-Wno-extra-semi",
++    "-Wno-extra-semi-stmt",
++    "-Wno-suggest-destructor-override",
++    "-Wno-shadow",
++    "-Wno-missing-noreturn",
++    "-Wno-nested-anon-types",
++    "-Wno-gnu-anonymous-struct",
++    "-Wno-nonportable-system-include-path",
++    "-Wno-microsoft-cast",
++    "-Wno-exit-time-destructors",
++    "-Wno-undef",  # #if <MACRO_NAME> to #ifdef <MACRO_NAME>
++    "-Wno-unused-macros",
++    "-Wno-redundant-parens",
++    "-Wno-undefined-func-template",
++    "-Wno-gnu-zero-variadic-macro-arguments",
++    "-Wno-double-promotion",
++    "-Wno-implicit-float-conversion",
++    "-Wno-implicit-int-conversion",
++    "-Wno-float-conversion",
++    "-Wno-unused-parameter",
++    "-Wno-suggest-override",
++    "-Wno-documentation",
++    "-Wno-documentation-unknown-command",
++    "-Wno-unsafe-buffer-usage",
++
++    ### possibly bad warnings for this codebase
++    "-Wno-covered-switch-default",
++    "-Wno-switch-default",
++    "-Wno-switch-enum",
++    "-Wno-c99-extensions",
++    "-Wno-unused-private-field",  # GRPC_UNUSED does not appear to work for private fields
++]
++
++GRPC_DEFAULT_COPTS = select({
++    "//:use_strict_warning": GRPC_LLVM_WARNING_FLAGS + ["-DUSE_STRICT_WARNING=1"],
++    "//:use_strict_warning_windows": GRPC_LLVM_WINDOWS_WARNING_FLAGS + ["-DUSE_STRICT_WARNING=1"],
++    "//conditions:default": [],
++})
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/custom_exec_properties.bzl b/third_party/systemlibs/grpc_conda_bazel/custom_exec_properties.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/custom_exec_properties.bzl
+@@ -0,0 +1,21 @@
++# Copyright 2019 The gRPC authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""
++Reimports constants from the grpc_custom_exec_properties repo.
++"""
++
++load("@grpc_custom_exec_properties//:constants.bzl", _LARGE_MACHINE = "LARGE_MACHINE")
++
++LARGE_MACHINE = _LARGE_MACHINE
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/cython_library.bzl b/third_party/systemlibs/grpc_conda_bazel/cython_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/cython_library.bzl
+@@ -0,0 +1,92 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""Custom rules for gRPC Python"""
++
++# Adapted with modifications from
++# tensorflow/tensorflow/core/platform/default/build_config.bzl
++# Native Bazel rules don't exist yet to compile Cython code, but rules have
++# been written at cython/cython and tensorflow/tensorflow. We branch from
++# Tensorflow's version as it is more actively maintained and works for gRPC
++# Python's needs.
++def pyx_library(name, deps = [], py_deps = [], srcs = [], **kwargs):
++    """Compiles a group of .pyx / .pxd / .py files.
++
++    First runs Cython to create .cpp files for each input .pyx or .py + .pxd
++    pair. Then builds a shared object for each, passing "deps" to each cc_binary
++    rule (includes Python headers by default). Finally, creates a py_library rule
++    with the shared objects and any pure Python "srcs", with py_deps as its
++    dependencies; the shared objects can be imported like normal Python files.
++
++    Args:
++        name: Name for the rule.
++        deps: C/C++ dependencies of the Cython (e.g. Numpy headers).
++        py_deps: Pure Python dependencies of the final library.
++        srcs: .py, .pyx, or .pxd files to either compile or pass through.
++        **kwargs: Extra keyword arguments passed to the py_library.
++    """
++
++    # First filter out files that should be run compiled vs. passed through.
++    py_srcs = []
++    pyx_srcs = []
++    pxd_srcs = []
++    for src in srcs:
++        if src.endswith(".pyx") or (src.endswith(".py") and
++                                    src[:-3] + ".pxd" in srcs):
++            pyx_srcs.append(src)
++        elif src.endswith(".py"):
++            py_srcs.append(src)
++        else:
++            pxd_srcs.append(src)
++        if src.endswith("__init__.py"):
++            pxd_srcs.append(src)
++
++    # Invoke cython to produce the shared object libraries.
++    for filename in pyx_srcs:
++        native.genrule(
++            name = filename + "_cython_translation",
++            srcs = [filename],
++            outs = [filename.split(".")[0] + ".cpp"],
++            # Optionally use PYTHON_BIN_PATH on Linux platforms so that python 3
++            # works. Windows has issues with cython_binary so skip PYTHON_BIN_PATH.
++            cmd =
++                "PYTHONHASHSEED=0 $(location @cython//:cython_binary) --cplus $(SRCS) --output-file $(OUTS)",
++            tools = ["@cython//:cython_binary"] + pxd_srcs,
++        )
++
++    shared_objects = []
++    defines = kwargs.pop("defines", [])
++    for src in pyx_srcs:
++        stem = src.split(".")[0]
++        shared_object_name = stem + ".so"
++        native.cc_binary(
++            name = shared_object_name,
++            srcs = [stem + ".cpp"],
++            deps = deps + ["@local_config_python//:python_headers"],
++            defines = defines,
++            linkshared = 1,
++        )
++        shared_objects.append(shared_object_name)
++
++    data = shared_objects[:]
++    data += kwargs.pop("data", [])
++
++    # Now create a py_library with these shared objects as data.
++    native.py_library(
++        name = name,
++        srcs = py_srcs,
++        deps = py_deps,
++        srcs_version = "PY2AND3",
++        data = data,
++        **kwargs
++    )
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/experiments.bzl b/third_party/systemlibs/grpc_conda_bazel/experiments.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/experiments.bzl
+@@ -0,0 +1,194 @@
++# Copyright 2023 gRPC authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++# Auto generated by tools/codegen/core/gen_experiments.py
++
++"""Dictionary of tags to experiments so we know when to test different experiments."""
++
++EXPERIMENT_ENABLES = {
++    "call_tracer_in_transport": "call_tracer_in_transport",
++    "canary_client_privacy": "canary_client_privacy",
++    "client_privacy": "client_privacy",
++    "event_engine_application_callbacks": "event_engine_application_callbacks",
++    "event_engine_client": "event_engine_client",
++    "event_engine_dns": "event_engine_dns",
++    "event_engine_dns_non_client_channel": "event_engine_dns_non_client_channel",
++    "event_engine_listener": "event_engine_listener",
++    "free_large_allocator": "free_large_allocator",
++    "local_connector_secure": "local_connector_secure",
++    "max_pings_wo_data_throttle": "max_pings_wo_data_throttle",
++    "monitoring_experiment": "monitoring_experiment",
++    "multiping": "multiping",
++    "pick_first_new": "pick_first_new",
++    "promise_based_inproc_transport": "promise_based_inproc_transport",
++    "rq_fast_reject": "rq_fast_reject",
++    "schedule_cancellation_over_write": "schedule_cancellation_over_write",
++    "server_privacy": "server_privacy",
++    "tcp_frame_size_tuning": "tcp_frame_size_tuning",
++    "tcp_rcv_lowat": "tcp_rcv_lowat",
++    "time_caching_in_party": "time_caching_in_party",
++    "trace_record_callops": "trace_record_callops",
++    "unconstrained_max_quota_buffer_size": "unconstrained_max_quota_buffer_size",
++    "work_serializer_dispatch": "work_serializer_dispatch",
++}
++
++EXPERIMENT_POLLERS = [
++    "event_engine_client",
++    "event_engine_dns",
++    "event_engine_dns_non_client_channel",
++    "event_engine_listener",
++]
++
++EXPERIMENTS = {
++    "windows": {
++        "dbg": {
++        },
++        "off": {
++            "core_end2end_test": [
++                "event_engine_dns_non_client_channel",
++                "local_connector_secure",
++            ],
++            "endpoint_test": [
++                "tcp_frame_size_tuning",
++                "tcp_rcv_lowat",
++            ],
++            "flow_control_test": [
++                "multiping",
++                "tcp_frame_size_tuning",
++                "tcp_rcv_lowat",
++            ],
++            "resource_quota_test": [
++                "free_large_allocator",
++                "unconstrained_max_quota_buffer_size",
++            ],
++        },
++        "on": {
++            "cancel_ares_query_test": [
++                "event_engine_dns",
++            ],
++            "core_end2end_test": [
++                "event_engine_client",
++                "event_engine_listener",
++            ],
++            "cpp_lb_end2end_test": [
++                "pick_first_new",
++            ],
++            "event_engine_client_test": [
++                "event_engine_client",
++            ],
++            "event_engine_listener_test": [
++                "event_engine_listener",
++            ],
++            "lb_unit_test": [
++                "pick_first_new",
++            ],
++            "resolver_component_tests_runner_invoker": [
++                "event_engine_dns",
++            ],
++            "xds_end2end_test": [
++                "pick_first_new",
++            ],
++        },
++    },
++    "ios": {
++        "dbg": {
++        },
++        "off": {
++            "core_end2end_test": [
++                "event_engine_dns_non_client_channel",
++                "local_connector_secure",
++            ],
++            "endpoint_test": [
++                "tcp_frame_size_tuning",
++                "tcp_rcv_lowat",
++            ],
++            "flow_control_test": [
++                "multiping",
++                "tcp_frame_size_tuning",
++                "tcp_rcv_lowat",
++            ],
++            "resource_quota_test": [
++                "free_large_allocator",
++                "unconstrained_max_quota_buffer_size",
++            ],
++        },
++        "on": {
++            "cpp_lb_end2end_test": [
++                "pick_first_new",
++            ],
++            "lb_unit_test": [
++                "pick_first_new",
++            ],
++            "xds_end2end_test": [
++                "pick_first_new",
++            ],
++        },
++    },
++    "posix": {
++        "dbg": {
++        },
++        "off": {
++            "core_end2end_test": [
++                "event_engine_dns_non_client_channel",
++                "local_connector_secure",
++            ],
++            "endpoint_test": [
++                "tcp_frame_size_tuning",
++                "tcp_rcv_lowat",
++            ],
++            "flow_control_test": [
++                "multiping",
++                "tcp_frame_size_tuning",
++                "tcp_rcv_lowat",
++            ],
++            "resource_quota_test": [
++                "free_large_allocator",
++                "unconstrained_max_quota_buffer_size",
++            ],
++        },
++        "on": {
++            "cancel_ares_query_test": [
++                "event_engine_dns",
++            ],
++            "core_end2end_test": [
++                "event_engine_client",
++                "event_engine_listener",
++                "work_serializer_dispatch",
++            ],
++            "cpp_end2end_test": [
++                "work_serializer_dispatch",
++            ],
++            "cpp_lb_end2end_test": [
++                "pick_first_new",
++            ],
++            "event_engine_client_test": [
++                "event_engine_client",
++            ],
++            "event_engine_listener_test": [
++                "event_engine_listener",
++            ],
++            "lb_unit_test": [
++                "pick_first_new",
++                "work_serializer_dispatch",
++            ],
++            "resolver_component_tests_runner_invoker": [
++                "event_engine_dns",
++            ],
++            "xds_end2end_test": [
++                "pick_first_new",
++                "work_serializer_dispatch",
++            ],
++        },
++    },
++}
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/generate_cc.bzl b/third_party/systemlibs/grpc_conda_bazel/generate_cc.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/generate_cc.bzl
+@@ -0,0 +1,207 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""Generates C++ grpc stubs from proto_library rules.
++
++This is an internal rule used by cc_grpc_library, and shouldn't be used
++directly.
++"""
++
++load("@rules_proto//proto:defs.bzl", "ProtoInfo")
++load(
++    "//bazel:protobuf.bzl",
++    "get_include_directory",
++    "get_plugin_args",
++    "get_proto_root",
++    "proto_path_to_generated_filename",
++)
++
++_GRPC_PROTO_HEADER_FMT = "{}.grpc.pb.h"
++_GRPC_PROTO_SRC_FMT = "{}.grpc.pb.cc"
++_GRPC_PROTO_MOCK_HEADER_FMT = "{}_mock.grpc.pb.h"
++_PROTO_HEADER_FMT = "{}.pb.h"
++_PROTO_SRC_FMT = "{}.pb.cc"
++
++def _strip_package_from_path(label_package, file):
++    prefix_len = 0
++    if not file.is_source and file.path.startswith(file.root.path):
++        prefix_len = len(file.root.path) + 1
++
++    path = file.path
++    if len(label_package) == 0:
++        return path
++    if not path.startswith(label_package + "/", prefix_len):
++        fail("'{}' does not lie within '{}'.".format(path, label_package))
++    return path[prefix_len + len(label_package + "/"):]
++
++def _get_srcs_file_path(file):
++    if not file.is_source and file.path.startswith(file.root.path):
++        return file.path[len(file.root.path) + 1:]
++    return file.path
++
++def _join_directories(directories):
++    massaged_directories = [directory for directory in directories if len(directory) != 0]
++    return "/".join(massaged_directories)
++
++def generate_cc_impl(ctx):
++    """Implementation of the generate_cc rule.
++
++    Args:
++      ctx: The context object.
++    Returns:
++      The provider for the generated files.
++    """
++    protos = [f for src in ctx.attr.srcs for f in src[ProtoInfo].check_deps_sources.to_list()]
++    includes = [
++        f
++        for src in ctx.attr.srcs
++        for f in src[ProtoInfo].transitive_imports.to_list()
++    ]
++    outs = []
++    proto_root = get_proto_root(
++        ctx.label.workspace_root,
++    )
++
++    label_package = _join_directories([ctx.label.workspace_root, ctx.label.package])
++    if ctx.executable.plugin:
++        outs += [
++            proto_path_to_generated_filename(
++                _strip_package_from_path(label_package, proto),
++                _GRPC_PROTO_HEADER_FMT,
++            )
++            for proto in protos
++        ]
++        outs += [
++            proto_path_to_generated_filename(
++                _strip_package_from_path(label_package, proto),
++                _GRPC_PROTO_SRC_FMT,
++            )
++            for proto in protos
++        ]
++        if ctx.attr.generate_mocks:
++            outs += [
++                proto_path_to_generated_filename(
++                    _strip_package_from_path(label_package, proto),
++                    _GRPC_PROTO_MOCK_HEADER_FMT,
++                )
++                for proto in protos
++            ]
++    else:
++        outs += [
++            proto_path_to_generated_filename(
++                _strip_package_from_path(label_package, proto),
++                _PROTO_HEADER_FMT,
++            )
++            for proto in protos
++        ]
++        outs += [
++            proto_path_to_generated_filename(
++                _strip_package_from_path(label_package, proto),
++                _PROTO_SRC_FMT,
++            )
++            for proto in protos
++        ]
++    out_files = [ctx.actions.declare_file(out) for out in outs]
++    dir_out = str(ctx.genfiles_dir.path + proto_root)
++
++    arguments = []
++    if ctx.executable.plugin:
++        arguments += get_plugin_args(
++            ctx.executable.plugin,
++            ctx.attr.flags,
++            dir_out,
++            ctx.attr.generate_mocks,
++        )
++        tools = [ctx.executable.plugin]
++    else:
++        arguments.append("--cpp_out=" + ",".join(ctx.attr.flags) + ":" + dir_out)
++        tools = []
++
++    arguments += [
++        "--proto_path={}".format(get_include_directory(i))
++        for i in includes
++    ]
++
++    # Include the output directory so that protoc puts the generated code in the
++    # right directory.
++    arguments.append("--proto_path={0}{1}".format(dir_out, proto_root))
++    arguments += [_get_srcs_file_path(proto) for proto in protos]
++
++    # create a list of well known proto files if the argument is non-None
++    well_known_proto_files = []
++    if ctx.attr.well_known_protos:
++        f = ctx.attr.well_known_protos.files.to_list()[0].dirname
++        if f != "external/com_google_protobuf/src/google/protobuf":
++            print(
++                "Error: Only @com_google_protobuf//:well_known_type_protos is supported",
++            )  # buildifier: disable=print
++        else:
++            # f points to "external/com_google_protobuf/src/google/protobuf"
++            # add -I argument to protoc so it knows where to look for the proto files.
++            arguments.append("-I{0}".format(f + "/../.."))
++            well_known_proto_files = [
++                f
++                for f in ctx.attr.well_known_protos.files.to_list()
++            ]
++
++    ctx.actions.run(
++        inputs = protos + includes + well_known_proto_files,
++        tools = tools,
++        outputs = out_files,
++        executable = ctx.executable._protoc,
++        arguments = arguments,
++        use_default_shell_env = True,
++    )
++
++    return DefaultInfo(files = depset(out_files))
++
++_generate_cc = rule(
++    attrs = {
++        "srcs": attr.label_list(
++            mandatory = True,
++            allow_empty = False,
++            providers = [ProtoInfo],
++        ),
++        "plugin": attr.label(
++            executable = True,
++            providers = ["files_to_run"],
++            cfg = "exec",
++        ),
++        "flags": attr.string_list(
++            mandatory = False,
++            allow_empty = True,
++        ),
++        "well_known_protos": attr.label(mandatory = False),
++        "generate_mocks": attr.bool(
++            default = False,
++            mandatory = False,
++        ),
++        "_protoc": attr.label(
++            default = Label("@com_google_protobuf//:protoc"),
++            executable = True,
++            cfg = "exec",
++        ),
++    },
++    # We generate .h files, so we need to output to genfiles.
++    output_to_genfiles = True,
++    implementation = generate_cc_impl,
++)
++
++def generate_cc(well_known_protos, **kwargs):
++    if well_known_protos:
++        _generate_cc(
++            well_known_protos = "@com_google_protobuf//:well_known_type_protos",
++            **kwargs
++        )
++    else:
++        _generate_cc(**kwargs)
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/generate_objc.bzl b/third_party/systemlibs/grpc_conda_bazel/generate_objc.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/generate_objc.bzl
+@@ -0,0 +1,243 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++"""
++This module contains build rules relating to gRPC Objective-C.
++"""
++
++load("@rules_proto//proto:defs.bzl", "ProtoInfo")
++load(
++    "//bazel:protobuf.bzl",
++    "get_include_directory",
++    "get_plugin_args",
++    "proto_path_to_generated_filename",
++)
++load(":grpc_util.bzl", "to_upper_camel_with_extension")
++
++_GRPC_PROTO_HEADER_FMT = "{}.pbrpc.h"
++_GRPC_PROTO_SRC_FMT = "{}.pbrpc.m"
++_PROTO_HEADER_FMT = "{}.pbobjc.h"
++_PROTO_SRC_FMT = "{}.pbobjc.m"
++_GENERATED_PROTOS_DIR = "_generated_protos"
++
++_GENERATE_HDRS = 1
++_GENERATE_SRCS = 2
++_GENERATE_NON_ARC_SRCS = 3
++
++def _generate_objc_impl(ctx):
++    """Implementation of the generate_objc rule."""
++    protos = [
++        f
++        for src in ctx.attr.deps
++        for f in src[ProtoInfo].transitive_imports.to_list()
++    ]
++
++    target_package = _join_directories([ctx.label.workspace_root, ctx.label.package])
++
++    files_with_rpc = [_label_to_full_file_path(f, target_package) for f in ctx.attr.srcs]
++
++    outs = []
++    for proto in protos:
++        outs.append(_get_output_file_name_from_proto(proto, _PROTO_HEADER_FMT))
++        outs.append(_get_output_file_name_from_proto(proto, _PROTO_SRC_FMT))
++
++        file_path = _get_full_path_from_file(proto)
++        if file_path in files_with_rpc:
++            outs.append(_get_output_file_name_from_proto(proto, _GRPC_PROTO_HEADER_FMT))
++            outs.append(_get_output_file_name_from_proto(proto, _GRPC_PROTO_SRC_FMT))
++
++    out_files = [ctx.actions.declare_file(out) for out in outs]
++    dir_out = _join_directories([
++        str(ctx.genfiles_dir.path),
++        target_package,
++        _GENERATED_PROTOS_DIR,
++    ])
++
++    arguments = []
++    tools = []
++    if ctx.executable.plugin:
++        arguments += get_plugin_args(
++            ctx.executable.plugin,
++            [],
++            dir_out,
++            False,
++        )
++        tools = [ctx.executable.plugin]
++    arguments.append("--objc_out=" + dir_out)
++
++    arguments.append("--proto_path=.")
++    arguments += [
++        "--proto_path={}".format(get_include_directory(i))
++        for i in protos
++    ]
++
++    # Include the output directory so that protoc puts the generated code in the
++    # right directory.
++    arguments.append("--proto_path={}".format(dir_out))
++    arguments += ["--proto_path={}".format(_get_directory_from_proto(proto)) for proto in protos]
++    arguments += [_get_full_path_from_file(proto) for proto in protos]
++
++    # create a list of well known proto files if the argument is non-None
++    well_known_proto_files = []
++    if ctx.attr.use_well_known_protos:
++        f = ctx.attr.well_known_protos.files.to_list()[0].dirname
++
++        # go two levels up so that #import "google/protobuf/..." is correct
++        arguments.append("-I{0}".format(f + "/../.."))
++        well_known_proto_files = ctx.attr.well_known_protos.files.to_list()
++    ctx.actions.run(
++        inputs = protos + well_known_proto_files,
++        tools = tools,
++        outputs = out_files,
++        executable = ctx.executable._protoc,
++        arguments = arguments,
++    )
++
++    return struct(files = depset(out_files))  # buildifier: disable=rule-impl-return
++
++def _label_to_full_file_path(src, package):
++    if not src.startswith("//"):
++        # Relative from current package
++        if not src.startswith(":"):
++            # "a.proto" -> ":a.proto"
++            src = ":" + src
++        src = "//" + package + src
++
++    # Converts //path/to/package:File.ext to path/to/package/File.ext.
++    src = src.replace("//", "")
++    src = src.replace(":", "/")
++    if src.startswith("/"):
++        # "//:a.proto" -> "/a.proto" so remove the initial slash
++        return src[1:]
++    else:
++        return src
++
++def _get_output_file_name_from_proto(proto, fmt):
++    return proto_path_to_generated_filename(
++        _GENERATED_PROTOS_DIR + "/" +
++        _get_directory_from_proto(proto) + _get_slash_or_null_from_proto(proto) +
++        to_upper_camel_with_extension(_get_file_name_from_proto(proto), "proto"),
++        fmt,
++    )
++
++def _get_file_name_from_proto(proto):
++    return proto.path.rpartition("/")[2]
++
++def _get_slash_or_null_from_proto(proto):
++    """Potentially returns empty (if the file is in the root directory)"""
++    return proto.path.rpartition("/")[1]
++
++def _get_directory_from_proto(proto):
++    return proto.path.rpartition("/")[0]
++
++def _get_full_path_from_file(file):
++    gen_dir_length = 0
++
++    # if file is generated, then prepare to remote its root
++    # (including CPU architecture...)
++    if not file.is_source:
++        gen_dir_length = len(file.root.path) + 1
++
++    return file.path[gen_dir_length:]
++
++def _join_directories(directories):
++    massaged_directories = [directory for directory in directories if len(directory) != 0]
++    return "/".join(massaged_directories)
++
++generate_objc = rule(
++    attrs = {
++        "deps": attr.label_list(
++            mandatory = True,
++            allow_empty = False,
++            providers = [ProtoInfo],
++        ),
++        "plugin": attr.label(
++            default = "@com_github_grpc_grpc//src/compiler:grpc_objective_c_plugin",
++            executable = True,
++            providers = ["files_to_run"],
++            cfg = "exec",
++        ),
++        "srcs": attr.string_list(
++            mandatory = False,
++            allow_empty = True,
++        ),
++        "use_well_known_protos": attr.bool(
++            mandatory = False,
++            default = False,
++        ),
++        "well_known_protos": attr.label(
++            default = "@com_google_protobuf//:well_known_type_protos",
++        ),
++        "_protoc": attr.label(
++            default = Label("@com_google_protobuf//:protoc"),
++            executable = True,
++            cfg = "exec",
++        ),
++    },
++    output_to_genfiles = True,
++    implementation = _generate_objc_impl,
++)
++
++def _group_objc_files_impl(ctx):
++    suffix = ""
++    if ctx.attr.gen_mode == _GENERATE_HDRS:
++        suffix = "h"
++    elif ctx.attr.gen_mode == _GENERATE_SRCS:
++        suffix = "pbrpc.m"
++    elif ctx.attr.gen_mode == _GENERATE_NON_ARC_SRCS:
++        suffix = "pbobjc.m"
++    else:
++        fail("Undefined gen_mode")
++    out_files = [
++        file
++        for file in ctx.attr.src.files.to_list()
++        if file.basename.endswith(suffix)
++    ]
++    return struct(files = depset(out_files))  # buildifier: disable=rule-impl-return
++
++generate_objc_hdrs = rule(
++    attrs = {
++        "src": attr.label(
++            mandatory = True,
++        ),
++        "gen_mode": attr.int(
++            default = _GENERATE_HDRS,
++        ),
++    },
++    implementation = _group_objc_files_impl,
++)
++
++generate_objc_srcs = rule(
++    attrs = {
++        "src": attr.label(
++            mandatory = True,
++        ),
++        "gen_mode": attr.int(
++            default = _GENERATE_SRCS,
++        ),
++    },
++    implementation = _group_objc_files_impl,
++)
++
++generate_objc_non_arc_srcs = rule(
++    attrs = {
++        "src": attr.label(
++            mandatory = True,
++        ),
++        "gen_mode": attr.int(
++            default = _GENERATE_NON_ARC_SRCS,
++        ),
++    },
++    implementation = _group_objc_files_impl,
++)
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/gevent_test.bzl b/third_party/systemlibs/grpc_conda_bazel/gevent_test.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/gevent_test.bzl
+@@ -0,0 +1,86 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""
++Houses py_grpc_gevent_test.
++"""
++
++load("@grpc_python_dependencies//:requirements.bzl", "requirement")
++
++_GRPC_LIB = "//src/python/grpcio/grpc:grpcio"
++
++_COPIED_MAIN_SUFFIX = ".gevent.main"
++
++def py_grpc_gevent_test(
++        name,
++        srcs,
++        main = None,
++        deps = None,
++        data = None,
++        **kwargs):
++    """Runs a Python test with gevent monkeypatched in.
++
++    Args:
++      name: The name of the test.
++      srcs: The source files.
++      main: The main file of the test.
++      deps: The dependencies of the test.
++      data: The data dependencies of the test.
++      **kwargs: Any other test arguments.
++    """
++    if main == None:
++        if len(srcs) != 1:
++            fail("When main is not provided, srcs must be of size 1.")
++        main = srcs[0]
++    deps = [] if deps == None else deps
++    data = [] if data == None else data
++    lib_name = name + ".gevent.lib"
++    supplied_python_version = kwargs.pop("python_version", "")
++    if supplied_python_version and supplied_python_version != "PY3":
++        fail("py_grpc_gevent_test only supports python_version=PY3")
++    native.py_library(
++        name = lib_name,
++        srcs = srcs,
++    )
++    augmented_deps = deps + [
++        ":{}".format(lib_name),
++        requirement("gevent"),
++    ]
++    if _GRPC_LIB not in augmented_deps:
++        augmented_deps.append(_GRPC_LIB)
++
++    # The main file needs to be in the same package as the test file.
++    copied_main_name = name + _COPIED_MAIN_SUFFIX
++    copied_main_filename = copied_main_name + ".py"
++    native.genrule(
++        name = copied_main_name,
++        srcs = ["//bazel:_gevent_test_main.py"],
++        outs = [copied_main_filename],
++        cmd = "cp $< $@",
++    )
++
++    # TODO(https://github.com/grpc/grpc/issues/27542): Remove once gevent is deemed non-flaky.
++    if "flaky" in kwargs:
++        kwargs.pop("flaky")
++
++    native.py_test(
++        name = name + ".gevent",
++        args = [name],
++        data = data,
++        deps = augmented_deps,
++        srcs = [copied_main_filename],
++        main = copied_main_filename,
++        python_version = "PY3",
++        flaky = False,
++        **kwargs
++    )
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/googleapis.BUILD b/third_party/systemlibs/grpc_conda_bazel/googleapis.BUILD
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/googleapis.BUILD
+@@ -0,0 +1,28 @@
++# Copyright 2023 gRPC authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++licenses(["notice"])
++
++package(
++    default_visibility = ["//visibility:public"],
++)
++
++# This is needed for the dependency on google_cloud_cpp to work.
++# Taken from https://github.com/googleapis/google-cloud-cpp/blob/2839e9dba793ca023e11ea67f201f66f74fa7d3e/bazel/googleapis.BUILD
++cc_library(
++    name = "googleapis_system_includes",
++    includes = [
++        ".",
++    ],
++)
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/grpc_build_system.bzl b/third_party/systemlibs/grpc_conda_bazel/grpc_build_system.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/grpc_build_system.bzl
+@@ -0,0 +1,827 @@
++# Copyright 2016 gRPC authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++#
++# This is for the gRPC build system. This isn't intended to be used outsite of
++# the BUILD file for gRPC. It contains the mapping for the template system we
++# use to generate other platform's build system files.
++#
++# Please consider that there should be a high bar for additions and changes to
++# this file.
++# Each rule listed must be re-written for Google's internal build system, and
++# each change must be ported from one to the other.
++#
++
++"""
++Contains macros used throughout the repo.
++"""
++
++load("@build_bazel_rules_apple//apple:ios.bzl", "ios_unit_test")
++load("@build_bazel_rules_apple//apple/testing/default_runner:ios_test_runner.bzl", "ios_test_runner")
++load("@com_google_protobuf//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
++load("//bazel:cc_grpc_library.bzl", "cc_grpc_library")
++load("//bazel:copts.bzl", "GRPC_DEFAULT_COPTS")
++load("//bazel:experiments.bzl", "EXPERIMENTS", "EXPERIMENT_ENABLES", "EXPERIMENT_POLLERS")
++load("//bazel:test_experiments.bzl", "TEST_EXPERIMENTS", "TEST_EXPERIMENT_ENABLES", "TEST_EXPERIMENT_POLLERS")
++
++# The set of pollers to test against if a test exercises polling
++POLLERS = ["epoll1", "poll"]
++
++# The set of known EventEngines to test
++EVENT_ENGINES = {"default": {"tags": []}}
++
++def if_not_windows(a):
++    return select({
++        "//:windows": [],
++        "//:windows_msvc": [],
++        "//:windows_clang": [],
++        "//conditions:default": a,
++    })
++
++def if_windows(a):
++    return select({
++        "//:windows": a,
++        "//:windows_msvc": a,
++        "//:windows_clang": a,
++        "//conditions:default": [],
++    })
++
++def _get_external_deps(external_deps):
++    ret = []
++    for dep in external_deps:
++        if dep.startswith("@"):
++            ret.append(dep)
++        elif dep == "address_sorting":
++            ret.append("//third_party/address_sorting")
++        elif dep == "xxhash":
++            ret.append("//third_party/xxhash")
++        elif dep == "cares":
++            ret += select({
++                "//:grpc_no_ares": [],
++                "//conditions:default": ["//third_party:cares"],
++            })
++        elif dep == "cronet_c_for_grpc":
++            ret.append("//third_party/objective_c/Cronet:cronet_c_for_grpc")
++        elif dep.startswith("absl/"):
++            ret.append("@com_google_absl//" + dep)
++        elif dep.startswith("google/"):
++            ret.append("@com_google_googleapis//" + dep)
++        elif dep.startswith("otel/"):
++            ret.append(dep.replace("otel/", "@io_opentelemetry_cpp//"))
++        elif dep.startswith("google_cloud_cpp"):
++            ret.append(dep.replace("google_cloud_cpp", "@google_cloud_cpp//"))
++        elif dep == "libprotobuf_mutator":
++            ret.append("@com_google_libprotobuf_mutator//:libprotobuf_mutator")
++        else:
++            ret.append("//third_party:" + dep)
++    return ret
++
++def _update_visibility(visibility):
++    if visibility == None:
++        return None
++
++    # Visibility rules prefixed with '@grpc:' are used to flag different visibility rule
++    # classes upstream.
++    PUBLIC = ["//visibility:public"]
++    PRIVATE = ["//:__subpackages__"]
++    VISIBILITY_TARGETS = {
++        "alt_grpc++_base_legacy": PRIVATE,
++        "alt_grpc_base_legacy": PRIVATE,
++        "alt_grpc++_base_unsecure_legacy": PRIVATE,
++        "alts_frame_protector": PRIVATE,
++        "channelz": PRIVATE,
++        "chaotic_good": PRIVATE,
++        "client_channel": PRIVATE,
++        "cli": PRIVATE,
++        "core_credentials": PRIVATE,
++        "debug_location": PRIVATE,
++        "endpoint_tests": PRIVATE,
++        "exec_ctx": PRIVATE,
++        "gpr_public_hdrs": PRIVATE,
++        "grpclb": PRIVATE,
++        "grpc_experiments": PRIVATE,
++        "grpc_opencensus_plugin": PUBLIC,
++        "grpc_public_hdrs": PRIVATE,
++        "grpcpp_gcp_observability": PUBLIC,
++        "grpc_resolver_fake": PRIVATE,
++        "grpc++_public_hdrs": PUBLIC,
++        "grpc++_test": PRIVATE,
++        "http": PRIVATE,
++        "httpcli": PRIVATE,
++        "iomgr_internal_errqueue": PRIVATE,
++        "iomgr_buffer_list": PRIVATE,
++        "json_reader_legacy": PRIVATE,
++        "latent_see": PRIVATE,
++        "otel_plugin": PRIVATE,
++        "public": PUBLIC,
++        "ref_counted_ptr": PRIVATE,
++        "tcp_tracer": PRIVATE,
++        "trace": PRIVATE,
++        "tsi_interface": PRIVATE,
++        "tsi": PRIVATE,
++        "xds": PRIVATE,
++        "xds_client_core": PRIVATE,
++        "xds_end2end_test_utils": PRIVATE,
++        "grpc_python_observability": PRIVATE,
++        "event_engine_base_hdrs": PRIVATE,
++        "useful": PRIVATE,
++    }
++    final_visibility = []
++    for rule in visibility:
++        if rule.startswith("@grpc:"):
++            for replacement in VISIBILITY_TARGETS[rule[len("@grpc:"):]]:
++                final_visibility.append(replacement)
++        else:
++            final_visibility.append(rule)
++    return [x for x in final_visibility]
++
++def grpc_cc_library(
++        name,
++        srcs = [],
++        public_hdrs = [],
++        hdrs = [],
++        external_deps = [],
++        defines = [],
++        deps = [],
++        select_deps = None,
++        standalone = False,
++        language = "C++",
++        testonly = False,
++        visibility = None,
++        alwayslink = 0,
++        data = [],
++        tags = [],
++        linkopts = [],
++        linkstatic = False):
++    """An internal wrapper around cc_library.
++
++    Args:
++      name: The name of the library.
++      srcs: The source files.
++      public_hdrs: The public headers.
++      hdrs: The headers.
++      external_deps: External dependencies to be resolved.
++      defines: Build defines to use.
++      deps: cc_library deps.
++      select_deps: deps included conditionally.
++      standalone: Unused.
++      language: The language of the library, e.g. C, C++.
++      testonly: Whether the target is for tests only.
++      visibility: The visibility of the target.
++      alwayslink: Whether to enable alwayslink on the cc_library.
++      data: Data dependencies.
++      tags: Tags to apply to the rule.
++      linkopts: Extra libraries to link.
++      linkstatic: Whether to enable linkstatic on the cc_library.
++    """
++    visibility = _update_visibility(visibility)
++    copts = []
++    if language.upper() == "C":
++        copts = copts + if_not_windows(["-std=c11"])
++    linkopts = linkopts + if_not_windows(["-pthread"]) + if_windows(["-defaultlib:ws2_32.lib"])
++    if select_deps:
++        for select_deps_entry in select_deps:
++            deps += select(select_deps_entry)
++    native.cc_library(
++        name = name,
++        srcs = srcs,
++        defines = defines +
++                  select({
++                      "//:grpc_no_ares": ["GRPC_ARES=0"],
++                      "//conditions:default": [],
++                  }) +
++                  select({
++                      "//:remote_execution": ["GRPC_PORT_ISOLATED_RUNTIME=1"],
++                      "//conditions:default": [],
++                  }) +
++                  select({
++                      "//:grpc_allow_exceptions": ["GRPC_ALLOW_EXCEPTIONS=1"],
++                      "//:grpc_disallow_exceptions": ["GRPC_ALLOW_EXCEPTIONS=0"],
++                      "//conditions:default": [],
++                  }),
++        hdrs = hdrs + public_hdrs,
++        deps = deps + _get_external_deps(external_deps),
++        copts = GRPC_DEFAULT_COPTS + copts,
++        visibility = visibility,
++        testonly = testonly,
++        linkopts = linkopts,
++        includes = [
++            "include",
++            "src/core/ext/upb-gen",  # Once upb code-gen issue is resolved, remove this.
++            "src/core/ext/upbdefs-gen",  # Once upb code-gen issue is resolved, remove this.
++        ],
++        alwayslink = alwayslink,
++        data = data,
++        tags = tags,
++        linkstatic = linkstatic,
++    )
++
++def grpc_proto_plugin(name, srcs = [], deps = []):
++    native.cc_binary(
++        name = name,
++        srcs = srcs,
++        deps = deps,
++    )
++
++def grpc_proto_library(
++        name,
++        srcs = [],
++        deps = [],
++        visibility = None,
++        well_known_protos = False,
++        has_services = True,
++        use_external = False,
++        generate_mocks = False):
++    cc_grpc_library(
++        name = name,
++        srcs = srcs,
++        deps = deps,
++        visibility = visibility,
++        well_known_protos = well_known_protos,
++        proto_only = not has_services,
++        use_external = use_external,
++        generate_mocks = generate_mocks,
++    )
++
++def ios_cc_test(
++        name,
++        tags = [],
++        **kwargs):
++    """An ios C++ test target.
++
++    Args:
++      name: The name of the test.
++      tags: The tags to apply to the test.
++      **kwargs: All other arguments to apply.
++    """
++    test_lib_ios = name + "_test_lib_ios"
++    ios_tags = tags + ["manual", "ios_cc_test"]
++    test_runner = "ios_x86_64_sim_runner_" + name
++    ios_test_runner(
++        name = test_runner,
++        device_type = "iPhone X",
++    )
++    if not any([t for t in tags if t.startswith("no_test_ios")]):
++        native.objc_library(
++            name = test_lib_ios,
++            srcs = kwargs.get("srcs"),
++            deps = kwargs.get("deps"),
++            copts = kwargs.get("copts"),
++            data = kwargs.get("data"),
++            tags = ios_tags,
++            alwayslink = 1,
++            testonly = 1,
++        )
++        ios_test_deps = [":" + test_lib_ios]
++        ios_unit_test(
++            name = name + "_on_ios",
++            size = kwargs.get("size"),
++            data = kwargs.get("data"),
++            tags = ios_tags,
++            minimum_os_version = "11.0",
++            runner = test_runner,
++            deps = ios_test_deps,
++        )
++
++def expand_poller_config(name, srcs, deps, tags, args, exclude_pollers, uses_polling, uses_event_engine, flaky):
++    """Common logic used to parameterize tests for every poller and EventEngine.
++
++    Used by expand_tests (repeatedly) to form base lists of pollers for each experiment.
++
++    Args:
++        name: base name of the test
++        srcs: source files
++        deps: base deps
++        tags: base tags
++        args: base args
++        flaky: base flaky
++        exclude_pollers: list of poller names to exclude for this set of tests.
++        uses_polling: set to False if the test is not sensitive to polling methodology.
++        uses_event_engine: set to False if the test is not sensitive to
++            EventEngine implementation differences
++
++    Returns:
++        A list of dictionaries containing modified values of name, srcs, deps, tags, and args.
++    """
++
++    poller_config = []
++
++    # See work_stealing_thread_pool.cc for details.
++    default_env = {"GRPC_THREAD_POOL_VERBOSE_FAILURES": "true"}
++
++    if not uses_polling:
++        tags = tags + ["no_uses_polling"]
++
++        poller_config.append({
++            "name": name,
++            "srcs": srcs,
++            "deps": deps,
++            "tags": tags,
++            "args": args,
++            "flaky": flaky,
++            "env": default_env,
++        })
++    else:
++        # On linux we run the same test with the default EventEngine, once for each
++        # poller
++        for poller in POLLERS:
++            if poller in exclude_pollers:
++                continue
++            poller_config.append({
++                "name": name + "@poller=" + poller,
++                "srcs": srcs,
++                "deps": deps,
++                "tags": (tags + EVENT_ENGINES["default"]["tags"] + [
++                    "no_windows",
++                    "no_mac",
++                    "bazel_only",
++                ]),
++                "args": args,
++                "env": {
++                    "GRPC_POLL_STRATEGY": poller,
++                } | default_env,
++                "flaky": flaky,
++            })
++
++        # Now generate one test for each subsequent EventEngine, all using the
++        # default poller. These tests will have `@engine=<name>` appended to the
++        # test target name. If a test target name has no `@engine=<name>` component,
++        # that indicates that the default EventEngine is being used.
++        if not uses_event_engine:
++            # The poller tests exercise the default engine on Linux. This test
++            # handles other platforms.
++            poller_config.append({
++                "name": name,
++                "srcs": srcs,
++                "deps": deps,
++                "tags": tags + ["no_linux"],
++                "args": args,
++                "env": default_env,
++                "flaky": flaky,
++            })
++        else:
++            for engine_name, engine in EVENT_ENGINES.items():
++                test_name = name + "@engine=" + engine_name
++                test_tags = tags + engine["tags"] + ["bazel_only"]
++                test_args = args + ["--engine=" + engine_name]
++                if engine_name == "default":
++                    # The poller tests exercise the default engine on Linux.
++                    # This test handles other platforms.
++                    test_name = name
++                    test_tags = tags + engine["tags"] + ["no_linux"]
++                    test_args = args
++                poller_config.append({
++                    "name": test_name,
++                    "srcs": srcs,
++                    "deps": deps,
++                    "tags": test_tags,
++                    "args": test_args,
++                    "env": default_env,
++                    "flaky": flaky,
++                })
++
++    return poller_config
++
++def expand_tests(name, srcs, deps, tags, args, exclude_pollers, uses_polling, uses_event_engine, flaky):
++    """Common logic used to parameterize tests for every poller and EventEngine and experiment.
++
++    Args:
++        name: base name of the test
++        srcs: source files
++        deps: base deps
++        tags: base tags
++        args: base args
++        flaky: base flaky
++        exclude_pollers: list of poller names to exclude for this set of tests.
++        uses_polling: set to False if the test is not sensitive to polling methodology.
++        uses_event_engine: set to False if the test is not sensitive to
++            EventEngine implementation differences
++
++    Returns:
++        A list of dictionaries containing modified values of name, srcs, deps, tags, and args.
++    """
++
++    experiments = {}
++
++    # buildifier: disable=uninitialized
++    def _populate_experiments_platform_config(config, platform_experiments_map):
++        for platform, experiments_on_platform in platform_experiments_map.items():
++            for mode, tag_to_experiments in experiments_on_platform.items():
++                if mode not in config:
++                    config[mode] = {}
++                for tag in tags:
++                    if tag not in tag_to_experiments:
++                        continue
++                    for experiment in tag_to_experiments[tag]:
++                        if experiment not in config[mode]:
++                            config[mode][experiment] = []
++                        config[mode][experiment].append(platform)
++
++    _populate_experiments_platform_config(experiments, EXPERIMENTS)
++    _populate_experiments_platform_config(experiments, TEST_EXPERIMENTS)
++
++    mode_config = {
++        # format: <mode>: (enabled_target_tags, disabled_target_tags)
++        "on": (None, []),
++        "off": ([], None),
++    }
++
++    must_have_tags = [
++        # We don't run experiments on cmake builds
++        "bazel_only",
++        # Nor on mac
++        "no_mac",
++        # Nor on arm64
++        "no_arm64",
++    ]
++
++    def _update_experiments_platform_test_tags(tags, platforms):
++        if "posix" not in platforms:
++            if "no_linux" not in tags:
++                tags.append("no_linux")
++            if "no_mac" not in tags:
++                tags.append("no_mac")
++        if "windows" not in platforms:
++            if "no_windows" not in tags:
++                tags.append("no_windows")
++        if "ios" not in platforms:
++            if "no_test_ios" not in tags:
++                tags.append("no_test_ios")
++        return tags
++
++    base_params = {
++        "name": name,
++        "srcs": srcs,
++        "deps": deps,
++        "tags": tags,
++        "args": args,
++        "exclude_pollers": exclude_pollers,
++        "uses_polling": uses_polling,
++        "uses_event_engine": uses_event_engine,
++        "flaky": flaky,
++    }
++
++    experiment_config = expand_poller_config(**base_params)
++    experiment_enables = {k: v for k, v in EXPERIMENT_ENABLES.items() + TEST_EXPERIMENT_ENABLES.items()}
++    experiment_pollers = EXPERIMENT_POLLERS + TEST_EXPERIMENT_POLLERS
++    for mode, config in mode_config.items():
++        enabled_tags, disabled_tags = config
++        if enabled_tags != None:
++            for experiment in experiments[mode].keys():
++                experiment_params = dict(base_params)
++                experiment_params["uses_polling"] = uses_polling and (experiment in experiment_pollers)
++                for config in expand_poller_config(**experiment_params):
++                    config = dict(config)
++                    config["name"] = config["name"] + "@experiment=" + experiment
++                    env = dict(config["env"])
++                    env["GRPC_EXPERIMENTS"] = experiment_enables[experiment]
++                    env["GRPC_CI_EXPERIMENTS"] = "1"
++                    config["env"] = env
++                    tags = config["tags"] + ["experiment_variation"]
++                    for tag in must_have_tags + enabled_tags:
++                        if tag not in tags:
++                            tags = tags + [tag]
++                    config["tags"] = _update_experiments_platform_test_tags(tags, experiments[mode][experiment])
++                    config["flaky"] = True
++                    experiment_config.append(config)
++        if disabled_tags != None:
++            for experiment in experiments[mode].keys():
++                experiment_params = dict(base_params)
++                experiment_params["uses_polling"] = uses_polling and (experiment in experiment_pollers)
++                for config in expand_poller_config(**experiment_params):
++                    config = dict(config)
++                    config["name"] = config["name"] + "@experiment=no_" + experiment
++                    env = dict(config["env"])
++                    env["GRPC_EXPERIMENTS"] = "-" + experiment
++                    env["GRPC_CI_EXPERIMENTS"] = "1"
++                    config["env"] = env
++                    tags = config["tags"] + ["experiment_variation"]
++                    for tag in must_have_tags + disabled_tags:
++                        if tag not in tags:
++                            tags = tags + [tag]
++                    config["tags"] = _update_experiments_platform_test_tags(tags, experiments[mode][experiment])
++                    experiment_config.append(config)
++    return experiment_config
++
++def grpc_cc_test(name, srcs = [], deps = [], external_deps = [], args = [], data = [], uses_polling = True, language = "C++", size = "medium", timeout = None, tags = [], exec_compatible_with = [], exec_properties = {}, shard_count = None, flaky = None, copts = [], linkstatic = None, exclude_pollers = [], uses_event_engine = True):
++    """A cc_test target for use in the gRPC repo.
++
++    Args:
++        name: The name of the test.
++        srcs: The source files.
++        deps: The target deps.
++        external_deps: The external deps.
++        args: The args to supply to the test binary.
++        data: Data dependencies.
++        uses_polling: Whether the test uses polling.
++        language: The language of the test, e.g C, C++.
++        size: The size of the test.
++        timeout: The test timeout.
++        tags: The tags for the test.
++        exec_compatible_with: A list of constraint values that must be
++            satisfied for the platform.
++        exec_properties: A dictionary of strings that will be added to the
++            exec_properties of a platform selected for this target.
++        shard_count: The number of shards for this test.
++        flaky: Whether this test is flaky.
++        copts: Add these to the compiler invocation.
++        linkstatic: link the binary in static mode
++        exclude_pollers: list of poller names to exclude for this set of tests.
++        uses_event_engine: set to False if the test is not sensitive to
++            EventEngine implementation differences
++    """
++    if language.upper() == "C":
++        copts = copts + if_not_windows(["-std=c11"])
++
++    core_deps = deps + _get_external_deps(external_deps) + ["//test/core/test_util:grpc_suppressions"]
++
++    # Test args for all tests
++    test_args = {
++        "data": data,
++        "copts": GRPC_DEFAULT_COPTS + copts,
++        "linkopts": if_not_windows(["-pthread"]) + if_windows(["-defaultlib:ws2_32.lib"]),
++        "size": size,
++        "timeout": timeout,
++        "exec_compatible_with": exec_compatible_with,
++        "exec_properties": exec_properties,
++        "shard_count": shard_count,
++        "linkstatic": linkstatic,
++    }
++
++    if "grpc-fuzzer" not in tags and "no_test_ios" not in tags:
++        ios_cc_test(
++            name = name,
++            srcs = srcs,
++            tags = tags,
++            deps = core_deps,
++            args = args,
++            flaky = True,
++            **test_args
++        )
++
++    native.cc_library(
++        name = "%s_TEST_LIBRARY" % name,
++        testonly = 1,
++        srcs = srcs,
++        deps = core_deps,
++        tags = tags,
++    )
++
++    for poller_config in expand_tests(name, srcs, core_deps, tags, args, exclude_pollers, uses_polling, uses_event_engine, flaky):
++        if poller_config["srcs"] != srcs:
++            fail("srcs changed")
++        if poller_config["deps"] != core_deps:
++            fail("deps changed: %r --> %r" % (deps, poller_config["deps"]))
++        native.cc_test(
++            name = poller_config["name"],
++            deps = ["%s_TEST_LIBRARY" % name],
++            tags = poller_config["tags"],
++            args = poller_config["args"],
++            env = poller_config["env"],
++            flaky = poller_config["flaky"],
++            **test_args
++        )
++
++def grpc_cc_binary(name, srcs = [], deps = [], external_deps = [], args = [], data = [], language = "C++", testonly = False, linkshared = False, linkopts = [], tags = [], features = [], visibility = None):
++    """Generates a cc_binary for use in the gRPC repo.
++
++    Args:
++      name: The name of the target.
++      srcs: The source files.
++      deps: The dependencies.
++      external_deps: The external dependencies.
++      args: The arguments to supply to the binary.
++      data: The data dependencies.
++      language: The language of the binary, e.g. C, C++.
++      testonly: Whether the binary is for tests only.
++      linkshared: Enables linkshared on the binary.
++      linkopts: linkopts to supply to the cc_binary.
++      tags: Tags to apply to the target.
++      features: features to be supplied to the cc_binary.
++      visibility: The visibility of the target.
++    """
++    visibility = _update_visibility(visibility)
++    copts = []
++    if language.upper() == "C":
++        copts = ["-std=c11"]
++    native.cc_binary(
++        name = name,
++        srcs = srcs,
++        args = args,
++        data = data,
++        testonly = testonly,
++        linkshared = linkshared,
++        deps = deps + _get_external_deps(external_deps) + ["//test/core/test_util:grpc_suppressions"],
++        copts = GRPC_DEFAULT_COPTS + copts,
++        linkopts = if_not_windows(["-pthread"]) + linkopts,
++        tags = tags,
++        features = features,
++        visibility = visibility,
++    )
++
++# buildifier: disable=unnamed-macro
++def grpc_generate_one_off_targets():
++    # In open-source, grpc_objc* libraries depend directly on //:grpc
++    native.alias(
++        name = "grpc_objc",
++        actual = "//:grpc",
++    )
++    native.config_setting(
++        name = "windows_other",
++        values = {"define": "GRPC_WINDOWS_OTHER=1"},
++    )
++
++def grpc_generate_objc_one_off_targets():
++    pass
++
++def grpc_generate_one_off_internal_targets():
++    pass
++
++def grpc_sh_test(name, srcs = [], args = [], data = [], uses_polling = True, size = "medium", timeout = None, tags = [], exec_compatible_with = [], exec_properties = {}, shard_count = None, flaky = None, exclude_pollers = [], uses_event_engine = True):
++    """Execute an sh_test for every <poller> x <EventEngine> combination
++
++    Args:
++        name: The name of the test.
++        srcs: The source files.
++        args: The args to supply to the test binary.
++        data: Data dependencies.
++        uses_polling: Whether the test uses polling.
++        size: The size of the test.
++        timeout: The test timeout.
++        tags: The tags for the test.
++        exec_compatible_with: A list of constraint values that must be
++            satisfied for the platform.
++        exec_properties: A dictionary of strings that will be added to the
++            exec_properties of a platform selected for this target.
++        shard_count: The number of shards for this test.
++        flaky: Whether this test is flaky.
++        exclude_pollers: list of poller names to exclude for this set of tests.
++        uses_event_engine: set to False if the test is not sensitive to
++            EventEngine implementation differences
++    """
++    test_args = {
++        "data": data,
++        "size": size,
++        "timeout": timeout,
++        "exec_compatible_with": exec_compatible_with,
++        "exec_properties": exec_properties,
++        "shard_count": shard_count,
++    }
++
++    for poller_config in expand_tests(name, srcs, [], tags, args, exclude_pollers, uses_polling, uses_event_engine, flaky):
++        native.sh_test(
++            name = poller_config["name"],
++            srcs = poller_config["srcs"],
++            deps = poller_config["deps"],
++            tags = poller_config["tags"],
++            args = poller_config["args"],
++            env = poller_config["env"],
++            flaky = poller_config["flaky"],
++            **test_args
++        )
++
++def grpc_sh_binary(name, srcs, data = []):
++    native.sh_binary(
++        name = name,
++        srcs = srcs,
++        data = data,
++    )
++
++def grpc_py_binary(
++        name,
++        srcs,
++        data = [],
++        deps = [],
++        external_deps = [],
++        testonly = False,
++        python_version = "PY2",
++        **kwargs):
++    native.py_binary(
++        name = name,
++        srcs = srcs,
++        testonly = testonly,
++        data = data,
++        deps = deps + _get_external_deps(external_deps),
++        python_version = python_version,
++        **kwargs
++    )
++
++def grpc_package(name, visibility = "private", features = []):
++    """Creates a package.
++
++    Args:
++        name: The name of the target
++        visibility: The visibility of the target.
++        features: The features to enable.
++    """
++    if visibility == "tests":
++        visibility = ["//test:__subpackages__", "//src/proto/grpc/testing:__subpackages__"]
++    elif visibility == "public":
++        visibility = ["//visibility:public"]
++    elif visibility == "private":
++        visibility = []
++    else:
++        fail("Unknown visibility " + visibility)
++
++    if len(visibility) != 0:
++        # buildifier: disable=native-package
++        native.package(
++            default_visibility = visibility,
++            features = features,
++        )
++
++def grpc_filegroup(name, srcs, **kwargs):
++    native.filegroup(
++        name = name,
++        srcs = srcs,
++        **kwargs
++    )
++
++def grpc_objc_library(
++        name,
++        srcs = [],
++        hdrs = [],
++        non_arc_srcs = [],
++        textual_hdrs = [],
++        testonly = False,
++        data = [],
++        deps = [],
++        defines = [],
++        sdk_frameworks = [],
++        includes = [],
++        visibility = ["//visibility:public"]):
++    """The grpc version of objc_library, only used for the Objective-C library compilation
++
++    Args:
++        name: name of target
++        hdrs: public headers
++        srcs: all source files (.m)
++        non_arc_srcs: list of Objective-C files that DO NOT use ARC.
++        textual_hdrs: private headers
++        testonly: Whether the binary is for tests only.
++        data: any other bundle resources
++        defines: preprocessors
++        sdk_frameworks: sdks
++        includes: added to search path, always [the path to objc directory]
++        deps: dependencies
++        visibility: visibility, default to public
++    """
++
++    native.objc_library(
++        name = name,
++        hdrs = hdrs,
++        srcs = srcs,
++        non_arc_srcs = non_arc_srcs,
++        textual_hdrs = textual_hdrs,
++        copts = GRPC_DEFAULT_COPTS + ["-ObjC++", "-std=gnu++14"],
++        testonly = testonly,
++        data = data,
++        deps = deps,
++        defines = defines,
++        includes = includes,
++        sdk_frameworks = sdk_frameworks,
++        visibility = visibility,
++    )
++
++def grpc_upb_proto_library(name, deps):
++    upb_proto_library(name = name, deps = deps)
++
++def grpc_upb_proto_reflection_library(name, deps):
++    upb_proto_reflection_library(name = name, deps = deps)
++
++# buildifier: disable=unnamed-macro
++def python_config_settings():
++    native.config_setting(
++        name = "python3",
++        flag_values = {"@bazel_tools//tools/python:python_version": "PY3"},
++    )
++
++# buildifier: disable=unnamed-macro
++def grpc_clang_cl_settings():
++    native.platform(
++        name = "x64_windows-clang-cl",
++        constraint_values = [
++            "@platforms//cpu:x86_64",
++            "@platforms//os:windows",
++            "@bazel_tools//tools/cpp:clang-cl",
++        ],
++    )
++    native.config_setting(
++        name = "windows_clang",
++        constraint_values = [
++            "@platforms//cpu:x86_64",
++            "@platforms//os:windows",
++            "@bazel_tools//tools/cpp:clang-cl",
++        ],
++    )
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/grpc_deps.bzl b/third_party/systemlibs/grpc_conda_bazel/grpc_deps.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/grpc_deps.bzl
+@@ -0,0 +1,2 @@
++def grpc_deps():
++    pass
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/grpc_extra_deps.bzl b/third_party/systemlibs/grpc_conda_bazel/grpc_extra_deps.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/grpc_extra_deps.bzl
+@@ -0,0 +1,2 @@
++def grpc_extra_deps(ignore_version_differences = False):
++    pass
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/grpc_python_deps.bzl b/third_party/systemlibs/grpc_conda_bazel/grpc_python_deps.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/grpc_python_deps.bzl
+@@ -0,0 +1,46 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""Load dependencies needed to compile and test the grpc python library as a 3rd-party consumer."""
++
++load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
++load("@com_github_grpc_grpc//third_party/py:python_configure.bzl", "python_configure")
++
++# buildifier: disable=unnamed-macro
++def grpc_python_deps():
++    """Loads dependencies for gRPC Python."""
++    if "rules_python" not in native.existing_rules():
++        http_archive(
++            name = "rules_python",
++            sha256 = "9d04041ac92a0985e344235f5d946f71ac543f1b1565f2cdbc9a2aaee8adf55b",
++            strip_prefix = "rules_python-0.26.0",
++            url = "https://github.com/bazelbuild/rules_python/releases/download/0.26.0/rules_python-0.26.0.tar.gz",
++        )
++
++    python_configure(name = "local_config_python")
++
++    native.bind(
++        name = "python_headers",
++        actual = "@local_config_python//:python_headers",
++    )
++
++    if "cython" not in native.existing_rules():
++        http_archive(
++            name = "cython",
++            build_file = "@com_github_grpc_grpc//third_party:cython.BUILD",
++            sha256 = "2ec7d66d23d6da2328fb24f5c1bec6c63a59ec2e91027766ab904f417e1078aa",
++            strip_prefix = "cython-3.0.11",
++            urls = [
++                "https://github.com/cython/cython/archive/3.0.11.tar.gz",
++            ],
++        )
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/grpc_util.bzl b/third_party/systemlibs/grpc_conda_bazel/grpc_util.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/grpc_util.bzl
+@@ -0,0 +1,72 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++# Follows convention set in objectivec_helpers.cc in the protobuf ObjC compiler.
++
++"""
++Contains generic helper utilities.
++"""
++
++_upper_segments_list = ["url", "http", "https"]
++
++def strip_extension(str):
++    return str.rpartition(".")[0]
++
++def capitalize(word):
++    if word in _upper_segments_list:
++        return word.upper()
++    else:
++        return word.capitalize()
++
++def lower_underscore_to_upper_camel(str):
++    """Converts from lower underscore case to upper camel case.
++
++    Args:
++      str: The snake case string to convert.
++
++    Returns:
++      The title case version of str.
++    """
++    str = strip_extension(str)
++    camel_case_str = ""
++    word = ""
++    for c in str.elems():  # NB: assumes ASCII!
++        if c.isalpha():
++            word += c.lower()
++        else:
++            # Last word is finished.
++            if len(word):
++                camel_case_str += capitalize(word)
++                word = ""
++            if c.isdigit():
++                camel_case_str += c
++
++            # Otherwise, drop the character. See UnderscoresToCamelCase in:
++            # third_party/protobuf/src/google/protobuf/compiler/objectivec/objectivec_helpers.cc
++
++    if len(word):
++        camel_case_str += capitalize(word)
++    return camel_case_str
++
++def file_to_upper_camel(src):
++    elements = src.rpartition("/")
++    upper_camel = lower_underscore_to_upper_camel(elements[-1])
++    return "".join(list(elements[:-1]) + [upper_camel])
++
++def file_with_extension(src, ext):
++    elements = src.rpartition("/")
++    return "".join(list(elements[:-1]) + [elements[-1], "." + ext])
++
++def to_upper_camel_with_extension(src, ext):
++    src = file_to_upper_camel(src)
++    return file_with_extension(src, ext)
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/internal_python_rules.bzl b/third_party/systemlibs/grpc_conda_bazel/internal_python_rules.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/internal_python_rules.bzl
+@@ -0,0 +1,46 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""Python-related rules intended only for use internal to the repo."""
++
++load("//bazel:gevent_test.bzl", "py_grpc_gevent_test")
++load("//bazel:logging_threshold_test.bzl", "py_grpc_logging_threshold_test")
++
++def internal_py_grpc_test(name, **kwargs):
++    """Runs a test under all supported environments.
++
++    Args:
++      name: The name of the test.
++      **kwargs: Any additional arguments to add to the test.
++    """
++    native.py_test(
++        name = name + ".native",
++        python_version = "PY3",
++        **kwargs
++    )
++    py_grpc_gevent_test(name, **kwargs)
++    py_grpc_logging_threshold_test(name, **kwargs)
++
++    suite_kwargs = {}
++    if "visibility" in kwargs:
++        suite_kwargs["visibility"] = kwargs["visibility"]
++
++    native.test_suite(
++        name = name,
++        tests = [
++            name + ".native",
++            name + ".gevent",
++            name + ".logging_threshold",
++        ],
++        **suite_kwargs
++    )
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/logging_threshold_test.bzl b/third_party/systemlibs/grpc_conda_bazel/logging_threshold_test.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/logging_threshold_test.bzl
+@@ -0,0 +1,73 @@
++# Copyright 2024 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""
++Houses py_grpc_logging_threshold_test.
++"""
++
++_COPIED_MAIN_SUFFIX = ".logging_threshold.main"
++
++def py_grpc_logging_threshold_test(
++        name,
++        srcs,
++        main = None,
++        deps = None,
++        data = None,
++        **kwargs):
++    """Runs a Python unit test and checks amount of logging against a threshold.
++
++    Args:
++      name: The name of the test.
++      srcs: The source files.
++      main: The main file of the test.
++      deps: The dependencies of the test.
++      data: The data dependencies of the test.
++      **kwargs: Any other test arguments.
++    """
++    if main == None:
++        if len(srcs) != 1:
++            fail("When main is not provided, srcs must be of size 1.")
++        main = srcs[0]
++    deps = [] if deps == None else deps
++    data = [] if data == None else data
++
++    lib_name = name + ".logging_threshold.lib"
++    native.py_library(
++        name = lib_name,
++        srcs = srcs,
++    )
++    augmented_deps = deps + [
++        ":{}".format(lib_name),
++    ]
++
++    # The main file needs to be in the same package as the test file.
++    copied_main_name = name + _COPIED_MAIN_SUFFIX
++    copied_main_filename = copied_main_name + ".py"
++    native.genrule(
++        name = copied_main_name,
++        srcs = ["//bazel:_logging_threshold_test_main.py"],
++        outs = [copied_main_filename],
++        cmd = "cp $< $@",
++    )
++
++    native.py_test(
++        name = name + ".logging_threshold",
++        args = ["$(location //bazel:_single_module_tester)", name],
++        data = data + ["//bazel:_single_module_tester"],
++        deps = augmented_deps,
++        srcs = [copied_main_filename],
++        main = copied_main_filename,
++        python_version = "PY3",
++        flaky = False,
++        **kwargs
++    )
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/objc_grpc_library.bzl b/third_party/systemlibs/grpc_conda_bazel/objc_grpc_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/objc_grpc_library.bzl
+@@ -0,0 +1,84 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""
++Contains the objc_grpc_library rule.
++"""
++
++load(
++    "//bazel:generate_objc.bzl",
++    "generate_objc",
++    "generate_objc_hdrs",
++    "generate_objc_non_arc_srcs",
++    "generate_objc_srcs",
++)
++
++def objc_grpc_library(name, deps, srcs = [], use_well_known_protos = False, **kwargs):
++    """Generates messages and/or service stubs for given proto_library and all transitively dependent proto files
++
++    Args:
++        name: name of target
++        deps: a list of proto_library targets that needs to be compiled
++        srcs: a list of labels to proto files with service stubs to be generated,
++            labels specified must include service stubs; otherwise Bazel will complain about srcs being empty
++        use_well_known_protos: whether to use the well known protos defined in
++            @com_google_protobuf//src/google/protobuf, default to false
++        **kwargs: other arguments
++    """
++    objc_grpc_library_name = "_" + name + "_objc_grpc_library"
++
++    generate_objc(
++        name = objc_grpc_library_name,
++        srcs = srcs,
++        deps = deps,
++        use_well_known_protos = use_well_known_protos,
++        **kwargs
++    )
++
++    generate_objc_hdrs(
++        name = objc_grpc_library_name + "_hdrs",
++        src = ":" + objc_grpc_library_name,
++    )
++
++    generate_objc_non_arc_srcs(
++        name = objc_grpc_library_name + "_non_arc_srcs",
++        src = ":" + objc_grpc_library_name,
++    )
++
++    arc_srcs = None
++    if len(srcs) > 0:
++        generate_objc_srcs(
++            name = objc_grpc_library_name + "_srcs",
++            src = ":" + objc_grpc_library_name,
++        )
++        arc_srcs = [":" + objc_grpc_library_name + "_srcs"]
++
++    native.objc_library(
++        name = name,
++        hdrs = [":" + objc_grpc_library_name + "_hdrs"],
++        non_arc_srcs = [":" + objc_grpc_library_name + "_non_arc_srcs"],
++        srcs = arc_srcs,
++        defines = [
++            "GPB_USE_PROTOBUF_FRAMEWORK_IMPORTS=0",
++            "GPB_GRPC_FORWARD_DECLARE_MESSAGE_PROTO=0",
++        ],
++        includes = [
++            "_generated_protos",
++            "src/objective-c",
++        ],
++        deps = [
++            "@com_github_grpc_grpc//src/objective-c:proto_objc_rpc",
++            "@com_google_protobuf//:protobuf_objc",
++        ],
++        **kwargs
++    )
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/platforms/android/BUILD b/third_party/systemlibs/grpc_conda_bazel/platforms/android/BUILD
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/platforms/android/BUILD
+@@ -0,0 +1,37 @@
++# Copyright 2024 gRPC authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++platform(
++    name = "x86_64",
++    constraint_values = [
++        "@platforms//os:android",
++        "@platforms//cpu:x86_64",
++    ],
++)
++
++platform(
++    name = "arm64-v8a",
++    constraint_values = [
++        "@platforms//os:android",
++        "@platforms//cpu:arm64",
++    ],
++)
++
++platform(
++    name = "armeabi-v7a",
++    constraint_values = [
++        "@platforms//os:android",
++        "@platforms//cpu:armv7",
++    ],
++)
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/protobuf.bzl b/third_party/systemlibs/grpc_conda_bazel/protobuf.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/protobuf.bzl
+@@ -0,0 +1,341 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""Utility functions for generating protobuf code."""
++
++load("@rules_proto//proto:defs.bzl", "ProtoInfo")
++
++_PROTO_EXTENSION = ".proto"
++_VIRTUAL_IMPORTS = "/_virtual_imports/"
++
++_WELL_KNOWN_PROTOS_BASE = [
++    "any_proto",
++    "api_proto",
++    "compiler_plugin_proto",
++    "descriptor_proto",
++    "duration_proto",
++    "empty_proto",
++    "field_mask_proto",
++    "source_context_proto",
++    "struct_proto",
++    "timestamp_proto",
++    "type_proto",
++    "wrappers_proto",
++]
++
++def well_known_proto_libs():
++    return ["@com_google_protobuf//:" + b for b in _WELL_KNOWN_PROTOS_BASE]
++
++def is_well_known(label):
++    # Bazel surfaces labels as their underlying identity, even if they are referenced
++    # via aliases. Bazel also does not currently provide a way to find the real label
++    # underlying an alias. So the implementation detail that the WKTs present at the
++    # top level of the protobuf repo are actually backed by targets in the
++    # //src/google/protobuf package leaks through here.
++    # We include both the alias path and the underlying path to be resilient to
++    # reversions of this change as well as for continuing compatibility with repos
++    # that happen to pull in older versions of protobuf.
++    all_wkt_targets = (["@com_google_protobuf//:" + b for b in _WELL_KNOWN_PROTOS_BASE] +
++                       ["@com_google_protobuf//src/google/protobuf:" + b for b in _WELL_KNOWN_PROTOS_BASE])
++    return label in all_wkt_targets
++
++def get_proto_root(workspace_root):
++    """Gets the root protobuf directory.
++
++    Args:
++      workspace_root: context.label.workspace_root
++
++    Returns:
++      The directory relative to which generated include paths should be.
++    """
++    if workspace_root:
++        return "/{}".format(workspace_root)
++    else:
++        return ""
++
++def _strip_proto_extension(proto_filename):
++    if not proto_filename.endswith(_PROTO_EXTENSION):
++        fail('"{}" does not end with "{}"'.format(
++            proto_filename,
++            _PROTO_EXTENSION,
++        ))
++    return proto_filename[:-len(_PROTO_EXTENSION)]
++
++def proto_path_to_generated_filename(proto_path, fmt_str):
++    """Calculates the name of a generated file for a protobuf path.
++
++    For example, "examples/protos/helloworld.proto" might map to
++      "helloworld.pb.h".
++
++    Args:
++      proto_path: The path to the .proto file.
++      fmt_str: A format string used to calculate the generated filename. For
++        example, "{}.pb.h" might be used to calculate a C++ header filename.
++
++    Returns:
++      The generated filename.
++    """
++    return fmt_str.format(_strip_proto_extension(proto_path))
++
++def get_include_directory(source_file):
++    """Returns the include directory path for the source_file.
++
++    All of the include statements within the given source_file are calculated
++    relative to the directory returned by this method.
++
++    The returned directory path can be used as the "--proto_path=" argument
++    value.
++
++    Args:
++      source_file: A proto file.
++
++    Returns:
++      The include directory path for the source_file.
++    """
++    directory = source_file.path
++    prefix_len = 0
++
++    if is_in_virtual_imports(source_file):
++        root, relative = source_file.path.split(_VIRTUAL_IMPORTS, 2)
++        result = root + _VIRTUAL_IMPORTS + relative.split("/", 1)[0]
++        return result
++
++    if not source_file.is_source and directory.startswith(source_file.root.path):
++        prefix_len = len(source_file.root.path) + 1
++
++    if directory.startswith("external", prefix_len):
++        external_separator = directory.find("/", prefix_len)
++        repository_separator = directory.find("/", external_separator + 1)
++        return directory[:repository_separator]
++    else:
++        return source_file.root.path if source_file.root.path else "."
++
++def get_plugin_args(
++        plugin,
++        flags,
++        dir_out,
++        generate_mocks,
++        plugin_name = "PLUGIN"):
++    """Returns arguments configuring protoc to use a plugin for a language.
++
++    Args:
++      plugin: An executable file to run as the protoc plugin.
++      flags: The plugin flags to be passed to protoc.
++      dir_out: The output directory for the plugin.
++      generate_mocks: A bool indicating whether to generate mocks.
++      plugin_name: A name of the plugin, it is required to be unique when there
++      are more than one plugin used in a single protoc command.
++    Returns:
++      A list of protoc arguments configuring the plugin.
++    """
++    augmented_flags = list(flags)
++    if generate_mocks:
++        augmented_flags.append("generate_mock_code=true")
++
++    augmented_dir_out = dir_out
++    if augmented_flags:
++        augmented_dir_out = ",".join(augmented_flags) + ":" + dir_out
++
++    return [
++        "--plugin=protoc-gen-{plugin_name}={plugin_path}".format(
++            plugin_name = plugin_name,
++            plugin_path = plugin.path,
++        ),
++        "--{plugin_name}_out={dir_out}".format(
++            plugin_name = plugin_name,
++            dir_out = augmented_dir_out,
++        ),
++    ]
++
++def _make_prefix(label):
++    """Returns the directory prefix for a label.
++
++    @repo//foo/bar:sub/dir/file.proto  =>  'external/repo/foo/bar/'
++    //foo/bar:sub/dir/file.proto       =>  'foo/bar/'
++    //:sub/dir/file.proto              =>  ''
++
++    That is, the prefix can be removed from a file's full path to
++    obtain the file's relative location within the package's effective
++    directory."""
++
++    wsr = label.workspace_root
++    pkg = label.package
++
++    if not wsr and not pkg:
++        return ""
++    elif not wsr:
++        return pkg + "/"
++    elif not pkg:
++        return wsr + "/"
++    else:
++        return wsr + "/" + pkg + "/"
++
++def get_staged_proto_file(label, context, source_file):
++    """Copies a proto file to the appropriate location if necessary.
++
++    Args:
++      label: The label of the rule using the .proto file.
++      context: The ctx object for the rule or aspect.
++      source_file: The original .proto file.
++
++    Returns:
++      The original proto file OR a new file in the staged location.
++    """
++    if source_file.dirname == label.package or \
++       is_in_virtual_imports(source_file):
++        # Current target and source_file are in same package
++        return source_file
++    else:
++        # Current target and source_file are in different packages (most
++        # probably even in different repositories)
++        prefix = _make_prefix(source_file.owner)
++        copied_proto = context.actions.declare_file(source_file.path[len(prefix):])
++        context.actions.run_shell(
++            inputs = [source_file],
++            outputs = [copied_proto],
++            command = "cp {} {}".format(source_file.path, copied_proto.path),
++            mnemonic = "CopySourceProto",
++        )
++        return copied_proto
++
++def protos_from_context(context):
++    """Copies proto files to the appropriate location.
++
++    Args:
++      context: The ctx object for the rule.
++
++    Returns:
++      A list of the protos.
++    """
++    protos = []
++    for src in context.attr.deps:
++        for file in src[ProtoInfo].direct_sources:
++            protos.append(get_staged_proto_file(context.label, context, file))
++    return protos
++
++def includes_from_deps(deps):
++    """Get includes from rule dependencies."""
++    return [
++        file
++        for src in deps
++        for file in src[ProtoInfo].transitive_imports.to_list()
++    ]
++
++def get_proto_arguments(protos, genfiles_dir_path):
++    """Get the protoc arguments specifying which protos to compile.
++
++    Args:
++      protos: The protob files to supply.
++      genfiles_dir_path: The path to the genfiles directory.
++
++    Returns:
++      The arguments to supply to protoc.
++    """
++    arguments = []
++    for proto in protos:
++        strip_prefix_len = 0
++        if is_in_virtual_imports(proto):
++            incl_directory = get_include_directory(proto)
++            if proto.path.startswith(incl_directory):
++                strip_prefix_len = len(incl_directory) + 1
++        elif proto.path.startswith(genfiles_dir_path):
++            strip_prefix_len = len(genfiles_dir_path) + 1
++
++        arguments.append(proto.path[strip_prefix_len:])
++
++    return arguments
++
++def declare_out_files(protos, context, generated_file_format):
++    """Declares and returns the files to be generated.
++
++    Args:
++      protos: A list of files. The protos to declare.
++      context: The context object.
++      generated_file_format: A format string. Will be passed to
++        proto_path_to_generated_filename to generate the filename of each
++        generated file.
++
++    Returns:
++      A list of file providers.
++    """
++
++    out_file_paths = []
++    for proto in protos:
++        if not is_in_virtual_imports(proto):
++            prefix = _make_prefix(proto.owner)
++            full_prefix = context.genfiles_dir.path + "/" + prefix
++            if proto.path.startswith(full_prefix):
++                out_file_paths.append(proto.path[len(full_prefix):])
++            elif proto.path.startswith(prefix):
++                out_file_paths.append(proto.path[len(prefix):])
++        else:
++            out_file_paths.append(proto.path[proto.path.index(_VIRTUAL_IMPORTS) + 1:])
++
++    return [
++        context.actions.declare_file(
++            proto_path_to_generated_filename(
++                out_file_path,
++                generated_file_format,
++            ),
++        )
++        for out_file_path in out_file_paths
++    ]
++
++def get_out_dir(protos, context):
++    """Returns the value to supply to the --<lang>_out= protoc flag.
++
++    The result is based on the input source proto files and current context.
++
++    Args:
++        protos: A list of protos to be used as source files in protoc command
++        context: A ctx object for the rule.
++    Returns:
++        The value of --<lang>_out= argument.
++    """
++    at_least_one_virtual = 0
++    for proto in protos:
++        if is_in_virtual_imports(proto):
++            at_least_one_virtual = True
++        elif at_least_one_virtual:
++            fail("Proto sources must be either all virtual imports or all real")
++    if at_least_one_virtual:
++        out_dir = get_include_directory(protos[0])
++        ws_root = protos[0].owner.workspace_root
++        prefix = "/" + _make_prefix(protos[0].owner) + _VIRTUAL_IMPORTS[1:]
++
++        return struct(
++            path = out_dir,
++            import_path = out_dir[out_dir.find(prefix) + 1:],
++        )
++
++    out_dir = context.genfiles_dir.path
++    ws_root = context.label.workspace_root
++    if ws_root:
++        out_dir = out_dir + "/" + ws_root
++    return struct(path = out_dir, import_path = None)
++
++def is_in_virtual_imports(source_file, virtual_folder = _VIRTUAL_IMPORTS):
++    """Determines if source_file is virtual.
++
++    A file is virtual if placed in the _virtual_imports subdirectory. The
++    output of all proto_library targets which use import_prefix and/or
++    strip_import_prefix arguments is placed under _virtual_imports directory.
++
++    Args:
++        source_file: A proto file.
++        virtual_folder: The virtual folder name (is set to "_virtual_imports"
++            by default)
++    Returns:
++        True if source_file is located under _virtual_imports, False otherwise.
++    """
++    return not source_file.is_source and virtual_folder in source_file.path
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/python_rules.bzl b/third_party/systemlibs/grpc_conda_bazel/python_rules.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/python_rules.bzl
+@@ -0,0 +1,310 @@
++# Copyright 2021 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++"""Generates and compiles Python gRPC stubs from proto_library rules."""
++
++load("@rules_proto//proto:defs.bzl", "ProtoInfo")
++load(
++    "//bazel:protobuf.bzl",
++    "declare_out_files",
++    "get_include_directory",
++    "get_out_dir",
++    "get_plugin_args",
++    "get_proto_arguments",
++    "get_staged_proto_file",
++    "includes_from_deps",
++    "is_well_known",
++    "protos_from_context",
++)
++
++_GENERATED_PROTO_FORMAT = "{}_pb2.py"
++_GENERATED_PROTO_STUB_FORMAT = "{}_pb2.pyi"
++_GENERATED_GRPC_PROTO_FORMAT = "{}_pb2_grpc.py"
++
++PyProtoInfo = provider(
++    "The Python outputs from the Protobuf compiler.",
++    fields = {
++        "py_info": "A PyInfo provider for the generated code.",
++        "generated_py_srcs": "The direct (not transitive) generated Python source files.",
++    },
++)
++
++def _merge_pyinfos(pyinfos):
++    return PyInfo(
++        transitive_sources = depset(transitive = [p.transitive_sources for p in pyinfos]),
++        imports = depset(transitive = [p.imports for p in pyinfos]),
++    )
++
++def _gen_py_aspect_impl(target, context):
++    # Early return for well-known protos.
++    if is_well_known(str(context.label)):
++        return [
++            PyProtoInfo(
++                py_info = context.attr._protobuf_library[PyInfo],
++                generated_py_srcs = [],
++            ),
++        ]
++
++    protos = []
++    for p in target[ProtoInfo].direct_sources:
++        protos.append(get_staged_proto_file(target.label, context, p))
++
++    includes = depset(direct = protos, transitive = [target[ProtoInfo].transitive_imports])
++    out_files = (declare_out_files(protos, context, _GENERATED_PROTO_FORMAT) +
++                 declare_out_files(protos, context, _GENERATED_PROTO_STUB_FORMAT))
++    generated_py_srcs = out_files
++
++    tools = [context.executable._protoc]
++
++    out_dir = get_out_dir(protos, context)
++
++    arguments = ([
++        "--python_out={}".format(out_dir.path),
++        "--pyi_out={}".format(out_dir.path),
++    ] + [
++        "--proto_path={}".format(get_include_directory(i))
++        for i in includes.to_list()
++    ] + [
++        "--proto_path={}".format(context.genfiles_dir.path),
++    ])
++
++    arguments += get_proto_arguments(protos, context.genfiles_dir.path)
++
++    context.actions.run(
++        inputs = protos + includes.to_list(),
++        tools = tools,
++        outputs = out_files,
++        executable = context.executable._protoc,
++        arguments = arguments,
++        mnemonic = "ProtocInvocation",
++    )
++
++    imports = []
++    if out_dir.import_path:
++        imports.append("{}/{}".format(context.workspace_name, out_dir.import_path))
++
++    py_info = PyInfo(transitive_sources = depset(direct = out_files), imports = depset(direct = imports))
++    return PyProtoInfo(
++        py_info = _merge_pyinfos(
++            [
++                py_info,
++                context.attr._protobuf_library[PyInfo],
++            ] + [dep[PyProtoInfo].py_info for dep in context.rule.attr.deps],
++        ),
++        generated_py_srcs = generated_py_srcs,
++    )
++
++_gen_py_aspect = aspect(
++    implementation = _gen_py_aspect_impl,
++    attr_aspects = ["deps"],
++    fragments = ["py"],
++    attrs = {
++        "_protoc": attr.label(
++            default = Label("@com_google_protobuf//:protoc"),
++            providers = ["files_to_run"],
++            executable = True,
++            cfg = "exec",
++        ),
++        "_protobuf_library": attr.label(
++            default = Label("@com_google_protobuf//:protobuf_python"),
++            providers = [PyInfo],
++        ),
++    },
++)
++
++def _generate_py_impl(context):
++    if (len(context.attr.deps) != 1):
++        fail("Can only compile a single proto at a time.")
++
++    py_sources = []
++
++    # If the proto_library this rule *directly* depends on is in another
++    # package, then we generate .py files to import them in this package. This
++    # behavior is needed to allow rearranging of import paths to make Bazel
++    # outputs align with native python workflows.
++    #
++    # Note that this approach is vulnerable to protoc defining __all__ or other
++    # symbols with __ prefixes that need to be directly imported. Since these
++    # names are likely to be reserved for private APIs, the risk is minimal.
++    if context.label.package != context.attr.deps[0].label.package:
++        for py_src in context.attr.deps[0][PyProtoInfo].generated_py_srcs:
++            reimport_py_file = context.actions.declare_file(py_src.basename)
++            py_sources.append(reimport_py_file)
++            import_line = "from %s import *" % py_src.short_path.replace("..", "external").replace("/", ".")[:-len(".py")]
++            context.actions.write(reimport_py_file, import_line)
++
++    # Collect output PyInfo provider.
++    imports = [context.label.package + "/" + i for i in context.attr.imports]
++    py_info = PyInfo(transitive_sources = depset(direct = py_sources), imports = depset(direct = imports))
++    out_pyinfo = _merge_pyinfos([py_info, context.attr.deps[0][PyProtoInfo].py_info])
++
++    runfiles = context.runfiles(files = out_pyinfo.transitive_sources.to_list()).merge(context.attr._protobuf_library[DefaultInfo].data_runfiles)
++    return [
++        DefaultInfo(
++            files = out_pyinfo.transitive_sources,
++            runfiles = runfiles,
++        ),
++        out_pyinfo,
++    ]
++
++py_proto_library = rule(
++    attrs = {
++        "deps": attr.label_list(
++            mandatory = True,
++            allow_empty = False,
++            providers = [ProtoInfo],
++            aspects = [_gen_py_aspect],
++        ),
++        "_protoc": attr.label(
++            default = Label("@com_google_protobuf//:protoc"),
++            providers = ["files_to_run"],
++            executable = True,
++            cfg = "exec",
++        ),
++        "_protobuf_library": attr.label(
++            default = Label("@com_google_protobuf//:protobuf_python"),
++            providers = [PyInfo],
++        ),
++        "imports": attr.string_list(),
++    },
++    implementation = _generate_py_impl,
++)
++
++def _generate_pb2_grpc_src_impl(context):
++    protos = protos_from_context(context)
++    includes = includes_from_deps(context.attr.deps)
++    out_files = declare_out_files(protos, context, _GENERATED_GRPC_PROTO_FORMAT)
++
++    plugin_flags = ["grpc_2_0"] + context.attr.strip_prefixes
++
++    arguments = []
++    tools = [context.executable._protoc, context.executable._grpc_plugin]
++    out_dir = get_out_dir(protos, context)
++    if out_dir.import_path:
++        # is virtual imports
++        out_path = out_dir.path
++    else:
++        out_path = context.genfiles_dir.path
++    arguments += get_plugin_args(
++        context.executable._grpc_plugin,
++        plugin_flags,
++        out_path,
++        False,
++    )
++
++    arguments += [
++        "--proto_path={}".format(get_include_directory(i))
++        for i in includes
++    ]
++    arguments.append("--proto_path={}".format(context.genfiles_dir.path))
++    arguments += get_proto_arguments(protos, context.genfiles_dir.path)
++
++    context.actions.run(
++        inputs = protos + includes,
++        tools = tools,
++        outputs = out_files,
++        executable = context.executable._protoc,
++        arguments = arguments,
++        mnemonic = "ProtocInvocation",
++    )
++
++    p = PyInfo(transitive_sources = depset(direct = out_files))
++    py_info = _merge_pyinfos(
++        [
++            p,
++            context.attr.grpc_library[PyInfo],
++        ] + [dep[PyInfo] for dep in context.attr.py_deps],
++    )
++
++    runfiles = context.runfiles(files = out_files, transitive_files = py_info.transitive_sources).merge(context.attr.grpc_library[DefaultInfo].data_runfiles)
++
++    return [
++        DefaultInfo(
++            files = depset(direct = out_files),
++            runfiles = runfiles,
++        ),
++        py_info,
++    ]
++
++_generate_pb2_grpc_src = rule(
++    attrs = {
++        "deps": attr.label_list(
++            mandatory = True,
++            allow_empty = False,
++            providers = [ProtoInfo],
++        ),
++        "py_deps": attr.label_list(
++            mandatory = True,
++            allow_empty = False,
++            providers = [PyInfo],
++        ),
++        "strip_prefixes": attr.string_list(),
++        "_grpc_plugin": attr.label(
++            executable = True,
++            providers = ["files_to_run"],
++            cfg = "exec",
++            default = Label("//src/compiler:grpc_python_plugin"),
++        ),
++        "_protoc": attr.label(
++            executable = True,
++            providers = ["files_to_run"],
++            cfg = "exec",
++            default = Label("@com_google_protobuf//:protoc"),
++        ),
++        "grpc_library": attr.label(
++            default = Label("//src/python/grpcio/grpc:grpcio"),
++            providers = [PyInfo],
++        ),
++    },
++    implementation = _generate_pb2_grpc_src_impl,
++)
++
++def py_grpc_library(
++        name,
++        srcs,
++        deps,
++        strip_prefixes = [],
++        grpc_library = Label("//src/python/grpcio/grpc:grpcio"),
++        **kwargs):
++    """Generate python code for gRPC services defined in a protobuf.
++
++    Args:
++      name: The name of the target.
++      srcs: (List of `labels`) a single proto_library target containing the
++        schema of the service.
++      deps: (List of `labels`) a single py_proto_library target for the
++        proto_library in `srcs`.
++      strip_prefixes: (List of `strings`) If provided, this prefix will be
++        stripped from the beginning of foo_pb2 modules imported by the
++        generated stubs. This is useful in combination with the `imports`
++        attribute of the `py_library` rule.
++      grpc_library: (`label`) a single `py_library` target representing the
++        python gRPC library target to be depended upon. This can be used to
++        generate code that depends on `grpcio` from the Python Package Index.
++      **kwargs: Additional arguments to be supplied to the invocation of
++        py_library.
++    """
++    if len(srcs) != 1:
++        fail("Can only compile a single proto at a time.")
++
++    if len(deps) != 1:
++        fail("Deps must have length 1.")
++
++    _generate_pb2_grpc_src(
++        name = name,
++        deps = srcs,
++        py_deps = deps,
++        strip_prefixes = strip_prefixes,
++        grpc_library = grpc_library,
++        **kwargs
++    )
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/rules_go.patch b/third_party/systemlibs/grpc_conda_bazel/rules_go.patch
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/rules_go.patch
+@@ -0,0 +1,19 @@
++# This patch works around a problem with Windows RBE described in
++# https://github.com/bazelbuild/bazel/issues/11636.  It can be removed
++# once that issue is resolved.
++diff --git a/go/private/rules/binary.bzl b/go/private/rules/binary.bzl
++index 40a17f4d..2741ad71 100644
++--- a/go/private/rules/binary.bzl
+++++ b/go/private/rules/binary.bzl
++@@ -462,8 +462,9 @@ exit /b %GO_EXIT_CODE%
++             content = cmd,
++         )
++         ctx.actions.run(
++-            executable = bat,
++-            inputs = sdk.headers + sdk.tools + sdk.srcs + ctx.files.srcs + [sdk.go],
+++            executable = "cmd.exe",
+++            arguments = ["/S", "/C", bat.path.replace("/", "\\")],
+++            inputs = sdk.headers + sdk.tools + sdk.srcs + ctx.files.srcs + [sdk.go, bat],
++             outputs = [out, gotmp],
++             mnemonic = "GoToolchainBinaryBuild",
++         )
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/supported_versions.txt b/third_party/systemlibs/grpc_conda_bazel/supported_versions.txt
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/supported_versions.txt
+@@ -0,0 +1,2 @@
++7.3.1
++6.5.0
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/test_experiments.bzl b/third_party/systemlibs/grpc_conda_bazel/test_experiments.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/test_experiments.bzl
+@@ -0,0 +1,60 @@
++# Copyright 2023 gRPC authors.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++# Auto generated by tools/codegen/core/gen_experiments.py
++
++"""Dictionary of tags to experiments so we know when to test different experiments."""
++
++TEST_EXPERIMENT_ENABLES = {
++    "test_experiment_1": "test_experiment_1",
++    "test_experiment_2": "test_experiment_2",
++    "test_experiment_3": "test_experiment_3",
++    "test_experiment_4": "test_experiment_4",
++}
++
++TEST_EXPERIMENT_POLLERS = [
++]
++
++TEST_EXPERIMENTS = {
++    "windows": {
++        "dbg": {
++        },
++        "off": {
++            "experiments_tag_test": [
++                "test_experiment_1",
++            ],
++        },
++        "on": {
++        },
++    },
++    "ios": {
++        "dbg": {
++        },
++        "off": {
++        },
++        "on": {
++        },
++    },
++    "posix": {
++        "dbg": {
++        },
++        "off": {
++        },
++        "on": {
++            "experiments_tag_test": [
++                "test_experiment_1",
++            ],
++        },
++    },
++}
+
+diff --git a/third_party/systemlibs/grpc_conda_bazel/update_mirror.sh b/third_party/systemlibs/grpc_conda_bazel/update_mirror.sh
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_bazel/update_mirror.sh
+@@ -0,0 +1,71 @@
++#!/bin/bash
++# Copyright 2020 The gRPC Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++# Script to upload github archives for bazel dependencies to GCS, creating a reliable mirror link.
++# Archives are copied to "grpc-bazel-mirror" GCS bucket (https://console.cloud.google.com/storage/browser/grpc-bazel-mirror?project=grpc-testing)
++# and will by downloadable with the https://storage.googleapis.com/grpc-bazel-mirror/ prefix.
++#
++# This script should be run each time bazel dependencies are updated.
++
++set -e
++
++cd $(dirname $0)/..
++
++# Create a temp directory to hold the versioned tarball,
++# and clean it up when the script exits.
++tmpdir="$(mktemp -d)"
++function cleanup {
++  rm -rf "$tmpdir"
++}
++trap cleanup EXIT
++
++function upload {
++  local file="$1"
++
++  if gsutil stat "gs://grpc-bazel-mirror/${file}" > /dev/null
++  then
++    echo "Skipping ${file}"
++  else
++    echo "Downloading https://${file}"
++    curl -L --fail --output "${tmpdir}/archive" "https://${file}"
++
++    echo "Uploading https://${file} to https://storage.googleapis.com/grpc-bazel-mirror/${file}"
++    gsutil cp "${tmpdir}/archive" "gs://grpc-bazel-mirror/${file}"
++
++    rm -rf "${tmpdir}/archive"
++  fi
++}
++
++# How to check that all mirror URLs work:
++# 1. clean $HOME/.cache/bazel
++# 2. bazel clean --expunge
++# 3. bazel sync (failed downloads will print warnings)
++
++# A specific link can be upload manually by running e.g.
++# upload "github.com/google/boringssl/archive/1c2769383f027befac5b75b6cedd25daf3bf4dcf.tar.gz"
++
++# bazel binaries used by the tools/bazel wrapper script
++upload github.com/bazelbuild/bazel/releases/download/6.5.0/bazel-6.5.0-linux-x86_64
++upload github.com/bazelbuild/bazel/releases/download/6.5.0/bazel-6.5.0-darwin-x86_64
++upload github.com/bazelbuild/bazel/releases/download/6.5.0/bazel-6.5.0-windows-x86_64.exe
++upload github.com/bazelbuild/bazel/releases/download/7.3.1/bazel-7.3.1-linux-x86_64
++upload github.com/bazelbuild/bazel/releases/download/7.3.1/bazel-7.3.1-darwin-x86_64
++upload github.com/bazelbuild/bazel/releases/download/7.3.1/bazel-7.3.1-windows-x86_64.exe
++
++# Collect the github archives to mirror from grpc_deps.bzl
++grep -o '"https://github.com/[^"]*"' bazel/grpc_deps.bzl | sed 's/^"https:\/\///' | sed 's/"$//' | while read -r line ; do
++    echo "Updating mirror for ${line}"
++    upload "${line}"
++done

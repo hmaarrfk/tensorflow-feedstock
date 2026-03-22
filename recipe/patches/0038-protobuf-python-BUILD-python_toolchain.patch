@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mark Harfouche <mark.harfouche@gmail.com>
+Date: Sun, 22 Mar 2026 00:00:00 +0000
+Subject: [PATCH 38/38] Add python_toolchain to system protobuf python/BUILD
+
+proto_lang_toolchain defaults to private visibility; py_proto_library aspects
+in //bazel need //python:python_toolchain visible (public).
+
+@com_google_protobuf//bazel:py_proto_library aspects default to
+//python:python_toolchain. The conda external only symlinked a minimal
+python/BUILD (proto_api). Declare proto_lang_toolchain + empty py_library
+runtime so analysis succeeds; generated protos use conda google.protobuf.
+---
+ third_party/systemlibs/protobuf_python.bzl | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/third_party/systemlibs/protobuf_python.bzl b/third_party/systemlibs/protobuf_python.bzl
+index 982617a765c..a1b2c3d4e5f 100644
+--- a/third_party/systemlibs/protobuf_python.bzl
++++ b/third_party/systemlibs/protobuf_python.bzl
+@@ -1,5 +1,20 @@
++load("@rules_python//python:py_library.bzl", "py_library")
++
+ cc_library(
+     name = "proto_api",
+    #  hdrs = ["google/protobuf/proto_api.h"],
+     visibility = ["//visibility:public"],
+ )
++
++py_library(
++    name = "_conda_python_proto_runtime",
++    srcs = [],
++    visibility = ["//visibility:public"],
++)
++
++proto_lang_toolchain(
++    name = "python_toolchain",
++    command_line = "--python_out=%s",
++    runtime = ":_conda_python_proto_runtime",
++    visibility = ["//visibility:public"],
++)

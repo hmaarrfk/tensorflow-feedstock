@@ -1,0 +1,56 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mark Harfouche <mark.harfouche@gmail.com>
+Date: Sat, 22 Mar 2026 00:00:00 +0000
+Subject: [PATCH] Add absl/functional:overload for system com_google_absl
+
+XLA math/intrinsic references @com_google_absl//absl/functional:overload;
+extend the slim system functional BUILD (header-only deps).
+Mirror under third_party/absl for system_link Labels.
+---
+ third_party/absl/system.absl.functional.BUILD              | 23 +++++++++++++++++++++++
+ third_party/xla/third_party/absl/system.absl.functional.BUILD |  8 ++++++++
+ 2 files changed, 31 insertions(+)
+
+--- /dev/null
++++ third_party/absl/system.absl.functional.BUILD
+@@ -0,0 +1,23 @@
++load("@rules_cc//cc:defs.bzl", "cc_library")
++
++package(default_visibility = ["//visibility:public"])
++
++cc_library(
++    name = "overload",
++    deps = [
++        "//absl/base:config",
++        "//absl/meta:type_traits",
++    ],
++)
++
++cc_library(
++    name = "any_invocable",
++)
++
++cc_library(
++    name = "bind_front",
++)
++
++cc_library(
++    name = "function_ref",
++)
+--- third_party/xla/third_party/absl/system.absl.functional.BUILD
++++ third_party/xla/third_party/absl/system.absl.functional.BUILD
+@@ -3,6 +3,14 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
+ package(default_visibility = ["//visibility:public"])
+ 
+ cc_library(
++    name = "overload",
++    deps = [
++        "//absl/base:config",
++        "//absl/meta:type_traits",
++    ],
++)
++
++cc_library(
+     name = "any_invocable",
+ )
+ 

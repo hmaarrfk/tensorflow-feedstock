@@ -3,6 +3,9 @@ From: "Uwe L. Korn" <uwe.korn@quantco.com>
 Date: Tue, 27 Feb 2024 18:01:19 -0500
 Subject: [PATCH 05/31] Add absl_log systemlib
 
+Use paths without a/ b/ prefixes so conda-build does not pick -p0 and
+install under b/third_party/ (which breaks //third_party/absl labels).
+
 Co-authored-by: Mark Harfouche <mark.harfouche@gmail.com>
 ---
  third_party/absl/system.absl.log.BUILD        | 24 +++++++++++++++++++
@@ -11,11 +14,8 @@ Co-authored-by: Mark Harfouche <mark.harfouche@gmail.com>
  create mode 100644 third_party/absl/system.absl.log.BUILD
  create mode 100644 third_party/xla/third_party/absl/system.absl.log.BUILD
 
-diff --git a/third_party/absl/system.absl.log.BUILD b/third_party/absl/system.absl.log.BUILD
-new file mode 100644
-index 00000000000..1fe1e342594
 --- /dev/null
-+++ b/third_party/absl/system.absl.log.BUILD
++++ third_party/absl/system.absl.log.BUILD
 @@ -0,0 +1,24 @@
 +load("@rules_cc//cc:defs.bzl", "cc_library")
 +
@@ -41,11 +41,8 @@ index 00000000000..1fe1e342594
 +        "-labsl_log_internal_nullguard",
 +    ],
 +)
-diff --git a/third_party/xla/third_party/absl/system.absl.log.BUILD b/third_party/xla/third_party/absl/system.absl.log.BUILD
-new file mode 100644
-index 00000000000..1fe1e342594
 --- /dev/null
-+++ b/third_party/xla/third_party/absl/system.absl.log.BUILD
++++ third_party/xla/third_party/absl/system.absl.log.BUILD
 @@ -0,0 +1,24 @@
 +load("@rules_cc//cc:defs.bzl", "cc_library")
 +

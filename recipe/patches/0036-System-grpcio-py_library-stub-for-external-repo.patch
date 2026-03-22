@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mark Harfouche <mark.harfouche@gmail.com>
+Date: Sun, 22 Mar 2026 00:00:00 +0000
+Subject: [PATCH 36/36] Stub grpcio py_library for system com_github_grpc_grpc
+
+py_grpc_library merges PyInfo from //src/python/grpcio/grpc:grpcio; the slim
+conda external only symlinks bazel/. Symlink a minimal py_library so analysis
+succeeds; the real grpc module is provided by the conda grpcio package.
+---
+ tensorflow/workspace2.bzl                                 | 1 +
+ .../systemlibs/grpc_conda_python_grpcio/grpc/BUILD.bazel  | 8 ++++++++
+ .../grpc_conda_python_grpcio/grpc/_conda_grpcio_stub.py   | 1 +
+ 3 files changed, 10 insertions(+)
+ create mode 100644 third_party/systemlibs/grpc_conda_python_grpcio/grpc/BUILD.bazel
+ create mode 100644 third_party/systemlibs/grpc_conda_python_grpcio/grpc/_conda_grpcio_stub.py
+
+diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
+index 8f4f74af..b3c3331f 100644
+--- a/tensorflow/workspace2.bzl
++++ b/tensorflow/workspace2.bzl
+@@ -514,6 +514,7 @@ def _tf_repositories():
+             "//third_party/systemlibs/grpc_conda_bazel:objc_grpc_library.bzl": "bazel/objc_grpc_library.bzl",
+             "//third_party/systemlibs/grpc_conda_bazel:protobuf.bzl": "bazel/protobuf.bzl",
+             "//third_party/systemlibs/grpc_conda_bazel:python_rules.bzl": "bazel/python_rules.bzl",
++            "//third_party/systemlibs/grpc_conda_python_grpcio/grpc:BUILD.bazel": "src/python/grpcio/grpc/BUILD.bazel",
+             "//third_party/systemlibs/grpc_conda_bazel:rules_go.patch": "bazel/rules_go.patch",
+             "//third_party/systemlibs/grpc_conda_bazel:supported_versions.txt": "bazel/supported_versions.txt",
+             "//third_party/systemlibs/grpc_conda_bazel:test_experiments.bzl": "bazel/test_experiments.bzl",
+diff --git a/third_party/systemlibs/grpc_conda_python_grpcio/grpc/BUILD.bazel b/third_party/systemlibs/grpc_conda_python_grpcio/grpc/BUILD.bazel
+new file mode 100644
+index 00000000..e326db95
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_python_grpcio/grpc/BUILD.bazel
+@@ -0,0 +1,8 @@
++load("@rules_python//python:py_library.bzl", "py_library")
++
++package(default_visibility = ["//visibility:public"])
++
++py_library(
++    name = "grpcio",
++    srcs = ["_conda_grpcio_stub.py"],
++)
+diff --git a/third_party/systemlibs/grpc_conda_python_grpcio/grpc/_conda_grpcio_stub.py b/third_party/systemlibs/grpc_conda_python_grpcio/grpc/_conda_grpcio_stub.py
+new file mode 100644
+index 00000000..280b1790
+--- /dev/null
++++ b/third_party/systemlibs/grpc_conda_python_grpcio/grpc/_conda_grpcio_stub.py
+@@ -0,0 +1 @@
++"""Bazel graph stub; import grpc resolves to the conda grpcio package at runtime."""

@@ -3,19 +3,20 @@ From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Sun, 12 May 2024 22:46:04 +1100
 Subject: [PATCH 16/31] add absl_die_if_null target
 
+Paths without a/ b/ so conda-build applies under the real tree (see 0005).
+Mirror the hunk into xla's system.absl.log.BUILD: tf_http_archive symlinks
+from the label that resolves to that copy for absl/log.
 ---
- third_party/absl/system.absl.log.BUILD | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+ third_party/absl/system.absl.log.BUILD              | 16 ++++++++++++++++
+ third_party/xla/third_party/absl/system.absl.log.BUILD | 16 ++++++++++++++++
+ 2 files changed, 32 insertions(+)
 
-diff --git a/third_party/absl/system.absl.log.BUILD b/third_party/absl/system.absl.log.BUILD
-index 1fe1e342594..141bb319489 100644
---- a/third_party/absl/system.absl.log.BUILD
-+++ b/third_party/absl/system.absl.log.BUILD
-@@ -2,6 +2,22 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
- 
+--- third_party/absl/system.absl.log.BUILD
++++ third_party/absl/system.absl.log.BUILD
+@@ -3,6 +3,22 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
  package(default_visibility = ["//visibility:public"])
  
-+cc_library(
+ cc_library(
 +    name = "die_if_null",
 +    linkopts = ["-labsl_die_if_null"],
 +    deps = [
@@ -31,6 +32,32 @@ index 1fe1e342594..141bb319489 100644
 +    actual = ":log",
 +)
 +
- cc_library(
++cc_library(
      name = "log",
      linkopts = [
+         "-labsl_vlog_config_internal",
+--- third_party/xla/third_party/absl/system.absl.log.BUILD
++++ third_party/xla/third_party/absl/system.absl.log.BUILD
+@@ -3,6 +3,22 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
+ package(default_visibility = ["//visibility:public"])
+ 
+ cc_library(
++    name = "die_if_null",
++    linkopts = ["-labsl_die_if_null"],
++    deps = [
++        ":log",
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/strings",
++    ],
++)
++
++alias(
++    name = "absl_log",
++    actual = ":log",
++)
++
++cc_library(
+     name = "log",
+     linkopts = [
+         "-labsl_vlog_config_internal",

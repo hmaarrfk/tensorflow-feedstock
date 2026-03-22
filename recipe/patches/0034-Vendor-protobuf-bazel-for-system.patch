@@ -1,0 +1,1448 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mark Harfouche <mark.harfouche@gmail.com>
+Date: Sat, 22 Mar 2026 00:00:00 +0000
+Subject: [PATCH 34/34] Vendor protobuf 5.28.3 bazel/ for system com_google_protobuf
+
+Same issue as gRPC: system com_google_protobuf external repo only had a few
+system_link_files and no bazel/ package, but XLA loads @com_google_protobuf//bazel:*.
+---
+
+diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
+--- a/tensorflow/workspace2.bzl
++++ b/tensorflow/workspace2.bzl
+@@ -400,6 +400,32 @@
+             "//third_party/systemlibs:protobuf.bzl": "protobuf.bzl",
+             "//third_party/systemlibs:protobuf_deps.bzl": "protobuf_deps.bzl",
+             "//third_party/systemlibs:protobuf_python.bzl": "python/BUILD",
++            "//third_party/systemlibs/protobuf_conda_bazel/common:BUILD.bazel": "bazel/common/BUILD.bazel",
++            "//third_party/systemlibs/protobuf_conda_bazel/common:proto_common.bzl": "bazel/common/proto_common.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel/common:proto_info.bzl": "bazel/common/proto_info.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel/common:proto_lang_toolchain_info.bzl": "bazel/common/proto_lang_toolchain_info.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal:BUILD.bazel": "bazel/private/upb_proto_library_internal/BUILD.bazel",
++            "//third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal:aspect.bzl": "bazel/private/upb_proto_library_internal/aspect.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal:cc_library_func.bzl": "bazel/private/upb_proto_library_internal/cc_library_func.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal:copts.bzl": "bazel/private/upb_proto_library_internal/copts.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal:rule.bzl": "bazel/private/upb_proto_library_internal/rule.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel/private:BUILD.bazel": "bazel/private/BUILD.bazel",
++            "//third_party/systemlibs/protobuf_conda_bazel/private:native.bzl": "bazel/private/native.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel/private:proto_toolchain_rule.bzl": "bazel/private/proto_toolchain_rule.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel/toolchains:BUILD.bazel": "bazel/toolchains/BUILD.bazel",
++            "//third_party/systemlibs/protobuf_conda_bazel/toolchains:proto_lang_toolchain.bzl": "bazel/toolchains/proto_lang_toolchain.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel/toolchains:proto_toolchain.bzl": "bazel/toolchains/proto_toolchain.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel:BUILD.bazel": "bazel/BUILD.bazel",
++            "//third_party/systemlibs/protobuf_conda_bazel:cc_proto_library.bzl": "bazel/cc_proto_library.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel:java_lite_proto_library.bzl": "bazel/java_lite_proto_library.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel:java_proto_library.bzl": "bazel/java_proto_library.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel:proto_library.bzl": "bazel/proto_library.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel:py_proto_library.bzl": "bazel/py_proto_library.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel:system_python.bzl": "bazel/system_python.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel:upb_c_proto_library.bzl": "bazel/upb_c_proto_library.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel:upb_minitable_proto_library.bzl": "bazel/upb_minitable_proto_library.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel:upb_proto_library.bzl": "bazel/upb_proto_library.bzl",
++            "//third_party/systemlibs/protobuf_conda_bazel:upb_proto_reflection_library.bzl": "bazel/upb_proto_reflection_library.bzl",
+         },
+         patch_file = ["@local_xla//third_party/protobuf:protobuf.patch"],
+         sha256 = "f645e6e42745ce922ca5388b1883ca583bafe4366cc74cf35c3c9299005136e2",
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/BUILD.bazel b/third_party/systemlibs/protobuf_conda_bazel/BUILD.bazel
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/BUILD.bazel
+@@ -0,0 +1,57 @@
++# Copyright (c) 2009-2021, Google LLC
++# All rights reserved.
++#
++# Use of this source code is governed by a BSD-style
++# license that can be found in the LICENSE file or at
++# https://developers.google.com/open-source/licenses/bsd
++
++load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
++
++licenses(["notice"])
++
++bzl_library(
++    name = "proto_library_bzl",
++    srcs = ["proto_library.bzl"],
++    visibility = ["//visibility:public"],
++)
++
++bzl_library(
++    name = "cc_proto_library_bzl",
++    srcs = ["cc_proto_library.bzl"],
++    visibility = ["//visibility:public"],
++)
++
++bzl_library(
++    name = "java_proto_library_bzl",
++    srcs = ["java_proto_library.bzl"],
++    visibility = ["//visibility:public"],
++)
++
++bzl_library(
++    name = "java_lite_proto_library_bzl",
++    srcs = ["java_lite_proto_library.bzl"],
++    visibility = ["//visibility:public"],
++)
++
++bzl_library(
++    name = "py_proto_library_bzl",
++    srcs = ["py_proto_library.bzl"],
++    visibility = ["//visibility:public"],
++    deps = [
++        "//bazel/common:proto_common_bzl",
++        "//bazel/common:proto_info_bzl",
++        "@rules_python//python:py_info_bzl",
++    ],
++)
++
++bzl_library(
++    name = "upb_proto_library_bzl",
++    srcs = [
++        "upb_c_proto_library.bzl",
++        "upb_minitable_proto_library.bzl",
++        "upb_proto_library.bzl",
++        "upb_proto_reflection_library.bzl",
++    ],
++    visibility = ["//visibility:public"],
++    deps = ["//bazel/private:upb_proto_library_internal_bzl"],
++)
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/cc_proto_library.bzl b/third_party/systemlibs/protobuf_conda_bazel/cc_proto_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/cc_proto_library.bzl
+@@ -0,0 +1,3 @@
++"""cc_proto_library rule"""
++
++cc_proto_library = native.cc_proto_library
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/common/BUILD.bazel b/third_party/systemlibs/protobuf_conda_bazel/common/BUILD.bazel
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/common/BUILD.bazel
+@@ -0,0 +1,34 @@
++load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
++
++bzl_library(
++    name = "proto_common_bzl",
++    srcs = [
++        "proto_common.bzl",
++    ],
++    visibility = ["//visibility:public"],
++    deps = [
++        "//bazel/private:native_bzl",
++    ],
++)
++
++bzl_library(
++    name = "proto_info_bzl",
++    srcs = [
++        "proto_info.bzl",
++    ],
++    visibility = ["//visibility:public"],
++    deps = [
++        "//bazel/private:native_bzl",
++    ],
++)
++
++bzl_library(
++    name = "proto_lang_toolchain_info_bzl",
++    srcs = [
++        "proto_lang_toolchain_info.bzl",
++    ],
++    visibility = ["//visibility:public"],
++    deps = [
++        ":proto_common.bzl",
++    ],
++)
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/common/proto_common.bzl b/third_party/systemlibs/protobuf_conda_bazel/common/proto_common.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/common/proto_common.bzl
+@@ -0,0 +1,5 @@
++"""proto_common"""
++
++load("//bazel/private:native.bzl", "native_proto_common")
++
++proto_common = native_proto_common
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/common/proto_info.bzl b/third_party/systemlibs/protobuf_conda_bazel/common/proto_info.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/common/proto_info.bzl
+@@ -0,0 +1,5 @@
++"""ProtoInfo"""
++
++load("//bazel/private:native.bzl", "NativeProtoInfo")
++
++ProtoInfo = NativeProtoInfo
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/common/proto_lang_toolchain_info.bzl b/third_party/systemlibs/protobuf_conda_bazel/common/proto_lang_toolchain_info.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/common/proto_lang_toolchain_info.bzl
+@@ -0,0 +1,5 @@
++"""ProtoLangToolchainInfo"""
++
++load("//bazel/common:proto_common.bzl", "proto_common")
++
++ProtoLangToolchainInfo = proto_common.ProtoLangToolchainInfo
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/java_lite_proto_library.bzl b/third_party/systemlibs/protobuf_conda_bazel/java_lite_proto_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/java_lite_proto_library.bzl
+@@ -0,0 +1,3 @@
++"""java_lite_proto_library rule"""
++
++java_lite_proto_library = native.java_lite_proto_library
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/java_proto_library.bzl b/third_party/systemlibs/protobuf_conda_bazel/java_proto_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/java_proto_library.bzl
+@@ -0,0 +1,3 @@
++"""java_proto_library rule"""
++
++java_proto_library = native.java_proto_library
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/private/BUILD.bazel b/third_party/systemlibs/protobuf_conda_bazel/private/BUILD.bazel
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/private/BUILD.bazel
+@@ -0,0 +1,42 @@
++# Copyright (c) 2009-2021, Google LLC
++# All rights reserved.
++#
++# Use of this source code is governed by a BSD-style
++# license that can be found in the LICENSE file or at
++# https://developers.google.com/open-source/licenses/bsd
++
++load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
++
++licenses(["notice"])
++
++bzl_library(
++    name = "upb_proto_library_internal_bzl",
++    srcs = [
++        "upb_proto_library_internal/aspect.bzl",
++        "upb_proto_library_internal/cc_library_func.bzl",
++        "upb_proto_library_internal/copts.bzl",
++        "upb_proto_library_internal/rule.bzl",
++    ],
++    visibility = ["//bazel:__pkg__"],
++    deps = [
++        "//bazel/common:proto_common_bzl",
++        "@bazel_skylib//lib:paths",
++        "@bazel_tools//tools/cpp:toolchain_utils.bzl",
++    ],
++)
++
++bzl_library(
++    name = "native_bzl",
++    srcs = [
++        "native.bzl",
++    ],
++    visibility = ["//bazel:__subpackages__"],
++)
++
++bzl_library(
++    name = "proto_toolchain_rule_bzl",
++    srcs = [
++        "proto_toolchain_rule.bzl",
++    ],
++    visibility = ["//bazel:__subpackages__"],
++)
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/private/native.bzl b/third_party/systemlibs/protobuf_conda_bazel/private/native.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/private/native.bzl
+@@ -0,0 +1,5 @@
++"""Renames toplevel symbols so they can be exported in Starlark under the same name"""
++
++NativeProtoInfo = ProtoInfo
++
++native_proto_common = proto_common_do_not_use
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/private/proto_toolchain_rule.bzl b/third_party/systemlibs/protobuf_conda_bazel/private/proto_toolchain_rule.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/private/proto_toolchain_rule.bzl
+@@ -0,0 +1,47 @@
++"""A Starlark implementation of the proto_toolchain rule."""
++
++load("//bazel/common:proto_common.bzl", "proto_common")
++load("//bazel/common:proto_lang_toolchain_info.bzl", "ProtoLangToolchainInfo")
++
++def _impl(ctx):
++    kwargs = {}
++    if getattr(proto_common, "INCOMPATIBLE_PASS_TOOLCHAIN_TYPE", False):
++        kwargs["toolchain_type"] = "@rules_proto//proto:toolchain_type"
++
++    return [
++        DefaultInfo(
++            files = depset(),
++            runfiles = ctx.runfiles(),
++        ),
++        platform_common.ToolchainInfo(
++            proto = ProtoLangToolchainInfo(
++                out_replacement_format_flag = ctx.attr.command_line,
++                output_files = ctx.attr.output_files,
++                plugin = None,
++                runtime = None,
++                proto_compiler = ctx.attr.proto_compiler.files_to_run,
++                protoc_opts = ctx.fragments.proto.experimental_protoc_opts,
++                progress_message = ctx.attr.progress_message,
++                mnemonic = ctx.attr.mnemonic,
++                **kwargs
++            ),
++        ),
++    ]
++
++proto_toolchain = rule(
++    _impl,
++    attrs =
++        {
++            "progress_message": attr.string(default = "Generating Descriptor Set proto_library %{label}"),
++            "mnemonic": attr.string(default = "GenProtoDescriptorSet"),
++            "command_line": attr.string(default = "--descriptor_set_out=%s"),
++            "output_files": attr.string(values = ["single", "multiple", "legacy"], default = "single"),
++            "proto_compiler": attr.label(
++                cfg = "exec",
++                executable = True,
++                allow_files = True,  # Used by mocks in tests. Consider fixing tests and removing it.
++            ),
++        },
++    provides = [platform_common.ToolchainInfo],
++    fragments = ["proto"],
++)
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/aspect.bzl b/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/aspect.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/aspect.bzl
+@@ -0,0 +1,304 @@
++"""Implementation of the aspect that powers the upb_*_proto_library() rules."""
++
++load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
++load("//bazel/common:proto_common.bzl", "proto_common")
++load("//bazel/common:proto_info.bzl", "ProtoInfo")
++load(":upb_proto_library_internal/cc_library_func.bzl", "cc_library_func")
++load(":upb_proto_library_internal/copts.bzl", "UpbProtoLibraryCoptsInfo")
++
++# begin:github_only
++_is_google3 = False
++# end:github_only
++
++# begin:google_only
++# _is_google3 = True
++# end:google_only
++
++GeneratedSrcsInfo = provider(
++    "Provides generated headers and sources",
++    fields = {
++        "srcs": "list of srcs",
++        "hdrs": "list of hdrs",
++        "thunks": "Experimental, do not use. List of srcs defining C API. Incompatible with hdrs.",
++    },
++)
++
++def output_dir(ctx, proto_info):
++    """Returns the output directory where generated proto files will be placed.
++
++    Args:
++      ctx: Rule context.
++      proto_info: ProtoInfo provider.
++
++    Returns:
++      A string specifying the output directory
++    """
++    proto_root = proto_info.proto_source_root
++    if proto_root.startswith(ctx.bin_dir.path):
++        path = proto_root
++    else:
++        path = ctx.bin_dir.path + "/" + proto_root
++
++    if proto_root == ".":
++        path = ctx.bin_dir.path
++    return path
++
++def _concat_lists(lists):
++    ret = []
++    for lst in lists:
++        ret = ret + lst
++    return ret
++
++def _merge_generated_srcs(srcs):
++    return GeneratedSrcsInfo(
++        srcs = _concat_lists([s.srcs for s in srcs]),
++        hdrs = _concat_lists([s.hdrs for s in srcs]),
++        thunks = _concat_lists([s.thunks for s in srcs]),
++    )
++
++def _get_implicit_weak_field_sources(ctx, proto_info):
++    # Creating one .cc file for each Message in a proto allows the linker to be more aggressive
++    # about removing unused classes. However, since the number of outputs won't be known at Blaze
++    # analysis time, all of the generated source files are put in a directory and a TreeArtifact is
++    # used to represent them.
++    proto_artifacts = []
++    for proto_source in proto_info.direct_sources:
++        # We can have slashes in the target name. For example, proto_source can be:
++        # dir/a.proto. However proto_source.basename will return a.proto, when in reality
++        # the BUILD file declares it as dir/a.proto, because target name contains a slash.
++        # There is no good workaround for this.
++        # I am using ctx.label.package to check if the name of the target contains slash or not.
++        # This is similar to what declare_directory does.
++        if not proto_source.short_path.startswith(ctx.label.package):
++            fail("This should never happen, proto source {} path does not start with {}.".format(
++                proto_source.short_path,
++                ctx.label.package,
++            ))
++        proto_source_name = proto_source.short_path[len(ctx.label.package) + 1:]
++        last_dot = proto_source_name.rfind(".")
++        if last_dot != -1:
++            proto_source_name = proto_source_name[:last_dot]
++        proto_artifacts.append(ctx.actions.declare_directory(proto_source_name + ".upb_weak_minitables"))
++
++    return proto_artifacts
++
++def _get_feature_configuration(ctx, cc_toolchain, proto_info):
++    requested_features = list(ctx.features)
++
++    # Disable the whole-archive behavior for protobuf generated code when the
++    # proto_one_output_per_message feature is enabled.
++    requested_features.append("disable_whole_archive_for_static_lib_if_proto_one_output_per_message")
++    unsupported_features = list(ctx.disabled_features)
++    if len(proto_info.direct_sources) != 0:
++        requested_features.append("header_modules")
++    else:
++        unsupported_features.append("header_modules")
++    return cc_common.configure_features(
++        ctx = ctx,
++        cc_toolchain = cc_toolchain,
++        requested_features = requested_features,
++        unsupported_features = unsupported_features,
++    )
++
++def _generate_srcs_list(ctx, generator, proto_info):
++    if len(proto_info.direct_sources) == 0:
++        return GeneratedSrcsInfo(srcs = [], hdrs = [], thunks = [], includes = [])
++
++    ext = "." + generator
++    srcs = []
++    thunks = []
++    hdrs = proto_common.declare_generated_files(
++        ctx.actions,
++        extension = ext + ".h",
++        proto_info = proto_info,
++    )
++    if not (generator == "upb" and _is_google3):
++        # TODO: The OSS build should also exclude this file for the upb generator,
++        # as it is empty and unnecessary.  We only added it to make the OSS build happy on
++        # Windows and macOS.
++        srcs += proto_common.declare_generated_files(
++            ctx.actions,
++            extension = ext + ".c",
++            proto_info = proto_info,
++        )
++    if generator == "upb":
++        thunks = proto_common.declare_generated_files(
++            ctx.actions,
++            extension = ext + ".thunks.c",
++            proto_info = proto_info,
++        )
++        ctx.actions.run_shell(
++            inputs = hdrs,
++            outputs = thunks,
++            command = " && ".join([
++                "sed 's/UPB_INLINE //' {} > {}".format(hdr.path, thunk.path)
++                for (hdr, thunk) in zip(hdrs, thunks)
++            ]),
++            progress_message = "Generating thunks for upb protos API for: " + ctx.label.name,
++            mnemonic = "GenUpbProtosThunks",
++        )
++
++    return GeneratedSrcsInfo(
++        srcs = srcs,
++        hdrs = hdrs,
++        thunks = thunks,
++    )
++
++def _generate_upb_protos(ctx, generator, proto_info, feature_configuration):
++    implicit_weak = generator == "upb_minitable" and cc_common.is_enabled(
++        feature_configuration = feature_configuration,
++        feature_name = "proto_one_output_per_message",
++    )
++
++    srcs = _generate_srcs_list(ctx, generator, proto_info)
++    additional_args = ctx.actions.args()
++
++    if implicit_weak:
++        srcs.srcs.extend(_get_implicit_weak_field_sources(ctx, proto_info))
++        additional_args.add("--upb_minitable_opt=one_output_per_message")
++
++    proto_common.compile(
++        actions = ctx.actions,
++        proto_info = proto_info,
++        proto_lang_toolchain_info = _get_lang_toolchain(ctx, generator),
++        generated_files = srcs.srcs + srcs.hdrs,
++        experimental_exec_group = "proto_compiler",
++        additional_args = additional_args,
++    )
++
++    return srcs
++
++def _generate_name(ctx, generator, thunks = False):
++    if thunks:
++        return ctx.rule.attr.name + "." + generator + ".thunks"
++    return ctx.rule.attr.name + "." + generator
++
++def _get_dep_cc_infos(target, ctx, generator, cc_provider, dep_cc_provider):
++    rule_deps = ctx.rule.attr.deps
++    dep_ccinfos = [dep[cc_provider].cc_info for dep in rule_deps]
++    if dep_cc_provider:
++        # This gives access to our direct sibling.  eg. foo.upb.h can #include "foo.upb_minitable.h"
++        dep_ccinfos.append(target[dep_cc_provider].cc_info)
++
++        # This gives access to imports.  eg. foo.upb.h can #include "import1.upb_minitable.h"
++        # But not transitive imports, eg. foo.upb.h cannot #include "transitive_import1.upb_minitable.h"
++        dep_ccinfos += [dep[dep_cc_provider].cc_info for dep in rule_deps]
++
++    return dep_ccinfos
++
++def _get_lang_toolchain(ctx, generator):
++    lang_toolchain_name = "_" + generator + "_toolchain"
++    return getattr(ctx.attr, lang_toolchain_name)[proto_common.ProtoLangToolchainInfo]
++
++def _compile_upb_protos(ctx, files, generator, dep_ccinfos, cc_provider, proto_info):
++    cc_info = cc_library_func(
++        ctx = ctx,
++        name = _generate_name(ctx, generator),
++        hdrs = files.hdrs,
++        srcs = files.srcs,
++        includes = [output_dir(ctx, proto_info)],
++        copts = ctx.attr._copts[UpbProtoLibraryCoptsInfo].copts,
++        dep_ccinfos = dep_ccinfos,
++    )
++
++    if files.thunks:
++        cc_info_with_thunks = cc_library_func(
++            ctx = ctx,
++            name = _generate_name(ctx, generator, files.thunks),
++            hdrs = [],
++            srcs = files.thunks,
++            includes = [output_dir(ctx, proto_info)],
++            copts = ctx.attr._copts[UpbProtoLibraryCoptsInfo].copts,
++            dep_ccinfos = dep_ccinfos + [cc_info],
++        )
++        return cc_provider(
++            cc_info = cc_info,
++            cc_info_with_thunks = cc_info_with_thunks,
++        )
++    else:
++        return cc_provider(
++            cc_info = cc_info,
++        )
++
++_GENERATORS = ["upb", "upbdefs", "upb_minitable"]
++
++def _get_hint_providers(ctx, generator):
++    if generator not in _GENERATORS:
++        fail("Please add new generator '{}' to _GENERATORS list".format(generator))
++
++    possible_owners = []
++    for generator in _GENERATORS:
++        possible_owners.append(ctx.label.relative(_generate_name(ctx, generator)))
++        possible_owners.append(ctx.label.relative(_generate_name(ctx, generator, thunks = True)))
++
++    if hasattr(cc_common, "CcSharedLibraryHintInfo"):
++        return [cc_common.CcSharedLibraryHintInfo(owners = possible_owners)]
++    elif hasattr(cc_common, "CcSharedLibraryHintInfo_6_X_constructor_do_not_use"):
++        # This branch can be deleted once 6.X is not supported by upb rules
++        return [cc_common.CcSharedLibraryHintInfo_6_X_constructor_do_not_use(owners = possible_owners)]
++
++    return []
++
++def upb_proto_aspect_impl(
++        target,
++        ctx,
++        generator,
++        cc_provider,
++        dep_cc_provider,
++        file_provider,
++        provide_cc_shared_library_hints = True):
++    """A shared aspect implementation for upb_*proto_library() rules.
++
++    Args:
++      target: The `target` parameter from the aspect function.
++      ctx: The `ctx` parameter from the aspect function.
++      generator: A string describing which aspect we are generating. This triggers several special
++        behaviors, and ideally this will be refactored to be less magical.
++      cc_provider: The provider that this aspect will attach to the target. Should contain a
++        `cc_info` field. The aspect will ensure that each compilation action can compile and link
++        against this provider's cc_info for all proto_library() deps.
++      dep_cc_provider: For aspects that depend on other aspects, this is the provider of the aspect
++        that we depend on. The aspect wil be able to include the header files from this provider.
++      file_provider: A provider that this aspect will attach to the target to expose the source
++        files generated by this aspect. These files are primarily useful for returning in
++        DefaultInfo(), so users who build the upb_*proto_library() rule directly can view the
++        generated sources.
++      provide_cc_shared_library_hints: Whether shared library hints should be provided.
++
++    Returns:
++      The `cc_provider` and `file_provider` providers as described above.
++    """
++    dep_ccinfos = _get_dep_cc_infos(target, ctx, generator, cc_provider, dep_cc_provider)
++    if not getattr(ctx.rule.attr, "srcs", []):
++        # This target doesn't declare any sources, reexport all its deps instead.
++        # This is known as an "alias library":
++        #    https://bazel.build/reference/be/protocol-buffer#proto_library.srcs
++        files = _merge_generated_srcs([dep[file_provider].srcs for dep in ctx.rule.attr.deps])
++        wrapped_cc_info = cc_provider(
++            cc_info = cc_common.merge_cc_infos(direct_cc_infos = dep_ccinfos),
++        )
++    else:
++        proto_info = target[ProtoInfo]
++        cc_toolchain = find_cpp_toolchain(ctx)
++        feature_configuration = _get_feature_configuration(ctx, cc_toolchain, proto_info)
++        files = _generate_upb_protos(
++            ctx,
++            generator,
++            proto_info,
++            feature_configuration,
++        )
++        wrapped_cc_info = _compile_upb_protos(
++            ctx,
++            files,
++            generator,
++            dep_ccinfos + [_get_lang_toolchain(ctx, generator).runtime[CcInfo]],
++            cc_provider,
++            proto_info,
++        )
++
++    hints = _get_hint_providers(ctx, generator) if provide_cc_shared_library_hints else []
++
++    return hints + [
++        file_provider(srcs = files),
++        wrapped_cc_info,
++    ]
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/cc_library_func.bzl b/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/cc_library_func.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/cc_library_func.bzl
+@@ -0,0 +1,86 @@
++"""A function to compile C/C++ code, like cc_library() but from Starlark."""
++
++load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
++
++# begin:google_only
++#
++# def upb_use_cpp_toolchain():
++#     # TODO: We shouldn't need to add this to the result of use_cpp_toolchain().
++#     return [
++#         config_common.toolchain_type(
++#             "@bazel_tools//tools/cpp:cc_runtimes_toolchain_type",
++#             mandatory = False,
++#         ),
++#     ] + use_cpp_toolchain()
++#
++# end:google_only
++
++# begin:github_only
++def upb_use_cpp_toolchain():
++    return use_cpp_toolchain()
++
++# end:github_only
++
++def cc_library_func(ctx, name, hdrs, srcs, copts, includes, dep_ccinfos):
++    """Like cc_library(), but callable from rules.
++
++    Args:
++      ctx: Rule context.
++      name: Unique name used to generate output files.
++      hdrs: Public headers that can be #included from other rules.
++      srcs: C/C++ source files.
++      copts: Additional options for cc compilation.
++      includes: Additional include paths.
++      dep_ccinfos: CcInfo providers of dependencies we should build/link against.
++
++    Returns:
++      CcInfo provider for this compilation.
++    """
++
++    # begin:google_only
++    #     cc_runtimes_toolchain = ctx.toolchains["@bazel_tools//tools/cpp:cc_runtimes_toolchain_type"]
++    #     if cc_runtimes_toolchain:
++    #         dep_ccinfos += [
++    #             target[CcInfo]
++    #             for target in cc_runtimes_toolchain.cc_runtimes_info.runtimes
++    #         ]
++    #
++    # end:google_only
++
++    compilation_contexts = [info.compilation_context for info in dep_ccinfos]
++    linking_contexts = [info.linking_context for info in dep_ccinfos]
++    toolchain = find_cpp_toolchain(ctx)
++    feature_configuration = cc_common.configure_features(
++        ctx = ctx,
++        cc_toolchain = toolchain,
++        requested_features = ctx.features,
++        unsupported_features = ctx.disabled_features,
++    )
++
++    (compilation_context, compilation_outputs) = cc_common.compile(
++        actions = ctx.actions,
++        feature_configuration = feature_configuration,
++        cc_toolchain = toolchain,
++        name = name,
++        srcs = srcs,
++        includes = includes,
++        public_hdrs = hdrs,
++        user_compile_flags = copts,
++        compilation_contexts = compilation_contexts,
++    )
++
++    # buildifier: disable=unused-variable
++    (linking_context, linking_outputs) = cc_common.create_linking_context_from_compilation_outputs(
++        actions = ctx.actions,
++        name = name,
++        feature_configuration = feature_configuration,
++        cc_toolchain = toolchain,
++        compilation_outputs = compilation_outputs,
++        linking_contexts = linking_contexts,
++        disallow_dynamic_library = cc_common.is_enabled(feature_configuration = feature_configuration, feature_name = "targets_windows") or not cc_common.is_enabled(feature_configuration = feature_configuration, feature_name = "supports_dynamic_linker"),
++    )
++
++    return CcInfo(
++        compilation_context = compilation_context,
++        linking_context = linking_context,
++    )
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/copts.bzl b/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/copts.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/copts.bzl
+@@ -0,0 +1,16 @@
++"""Dummy rule to expose select() copts to aspects."""
++
++UpbProtoLibraryCoptsInfo = provider(
++    "Provides copts for upb proto targets",
++    fields = {
++        "copts": "copts for upb_proto_library()",
++    },
++)
++
++def upb_proto_library_copts_impl(ctx):
++    return UpbProtoLibraryCoptsInfo(copts = ctx.attr.copts)
++
++upb_proto_library_copts = rule(
++    implementation = upb_proto_library_copts_impl,
++    attrs = {"copts": attr.string_list(default = [])},
++)
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/rule.bzl b/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/rule.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/rule.bzl
+@@ -0,0 +1,39 @@
++"""Internal rule implementation for upb_*_proto_library() rules."""
++
++def _filter_none(elems):
++    out = []
++    for elem in elems:
++        if elem:
++            out.append(elem)
++    return out
++
++def upb_proto_rule_impl(ctx, cc_info_provider, srcs_provider):
++    """An implementation for upb_*proto_library() rules.
++
++    Args:
++      ctx: The rule `ctx` argument
++      cc_info_provider: The provider containing a wrapped CcInfo that will be exposed to users who
++        depend on this rule.
++      srcs_provider: The provider containing the generated source files. This will be used to make
++        the DefaultInfo return the source files.
++
++    Returns:
++      Providers for this rule.
++    """
++    if len(ctx.attr.deps) != 1:
++        fail("only one deps dependency allowed.")
++    dep = ctx.attr.deps[0]
++    srcs = dep[srcs_provider].srcs
++    cc_info = dep[cc_info_provider].cc_info
++
++    lib = cc_info.linking_context.linker_inputs.to_list()[0].libraries[0]
++    files = _filter_none([
++        lib.static_library,
++        lib.pic_static_library,
++        lib.dynamic_library,
++    ])
++    return [
++        DefaultInfo(files = depset(files + srcs.hdrs + srcs.srcs)),
++        srcs,
++        cc_info,
++    ]
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/proto_library.bzl b/third_party/systemlibs/protobuf_conda_bazel/proto_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/proto_library.bzl
+@@ -0,0 +1,3 @@
++"""proto_library rule"""
++
++proto_library = native.proto_library
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/py_proto_library.bzl b/third_party/systemlibs/protobuf_conda_bazel/py_proto_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/py_proto_library.bzl
+@@ -0,0 +1,211 @@
++"""The implementation of the `py_proto_library` rule and its aspect."""
++
++load("@rules_python//python:py_info.bzl", "PyInfo")
++load("//bazel/common:proto_common.bzl", "proto_common")
++load("//bazel/common:proto_info.bzl", "ProtoInfo")
++
++PY_PROTO_TOOLCHAIN = "@rules_python//python/proto:toolchain_type"
++
++_PyProtoInfo = provider(
++    doc = "Encapsulates information needed by the Python proto rules.",
++    fields = {
++        "imports": """
++            (depset[str]) The field forwarding PyInfo.imports coming from
++            the proto language runtime dependency.""",
++        "runfiles_from_proto_deps": """
++            (depset[File]) Files from the transitive closure implicit proto
++            dependencies""",
++        "transitive_sources": """(depset[File]) The Python sources.""",
++    },
++)
++
++def _filter_provider(provider, *attrs):
++    return [dep[provider] for attr in attrs for dep in attr if provider in dep]
++
++def _incompatible_toolchains_enabled():
++    return getattr(proto_common, "INCOMPATIBLE_ENABLE_PROTO_TOOLCHAIN_RESOLUTION", False)
++
++def _py_proto_aspect_impl(target, ctx):
++    """Generates and compiles Python code for a proto_library.
++
++    The function runs protobuf compiler on the `proto_library` target generating
++    a .py file for each .proto file.
++
++    Args:
++      target: (Target) A target providing `ProtoInfo`. Usually this means a
++         `proto_library` target, but not always; you must expect to visit
++         non-`proto_library` targets, too.
++      ctx: (RuleContext) The rule context.
++
++    Returns:
++      ([_PyProtoInfo]) Providers collecting transitive information about
++      generated files.
++    """
++
++    _proto_library = ctx.rule.attr
++
++    # Check Proto file names
++    for proto in target[ProtoInfo].direct_sources:
++        if proto.is_source and "-" in proto.dirname:
++            fail("Cannot generate Python code for a .proto whose path contains '-' ({}).".format(
++                proto.path,
++            ))
++
++    if _incompatible_toolchains_enabled():
++        toolchain = ctx.toolchains[PY_PROTO_TOOLCHAIN]
++        if not toolchain:
++            fail("No toolchains registered for '%s'." % PY_PROTO_TOOLCHAIN)
++        proto_lang_toolchain_info = toolchain.proto
++    else:
++        proto_lang_toolchain_info = getattr(ctx.attr, "_aspect_proto_toolchain")[proto_common.ProtoLangToolchainInfo]
++
++    api_deps = [proto_lang_toolchain_info.runtime]
++
++    generated_sources = []
++    proto_info = target[ProtoInfo]
++    proto_root = proto_info.proto_source_root
++    if proto_info.direct_sources:
++        # Generate py files
++        generated_sources = proto_common.declare_generated_files(
++            actions = ctx.actions,
++            proto_info = proto_info,
++            extension = "_pb2.py",
++            name_mapper = lambda name: name.replace("-", "_").replace(".", "/"),
++        )
++
++        # Handles multiple repository and virtual import cases
++        if proto_root.startswith(ctx.bin_dir.path):
++            proto_root = proto_root[len(ctx.bin_dir.path) + 1:]
++
++        plugin_output = ctx.bin_dir.path + "/" + proto_root
++        proto_root = ctx.workspace_name + "/" + proto_root
++
++        proto_common.compile(
++            actions = ctx.actions,
++            proto_info = proto_info,
++            proto_lang_toolchain_info = proto_lang_toolchain_info,
++            generated_files = generated_sources,
++            plugin_output = plugin_output,
++        )
++
++    # Generated sources == Python sources
++    python_sources = generated_sources
++
++    deps = _filter_provider(_PyProtoInfo, getattr(_proto_library, "deps", []))
++    runfiles_from_proto_deps = depset(
++        transitive = [dep[DefaultInfo].default_runfiles.files for dep in api_deps] +
++                     [dep.runfiles_from_proto_deps for dep in deps],
++    )
++    transitive_sources = depset(
++        direct = python_sources,
++        transitive = [dep.transitive_sources for dep in deps],
++    )
++
++    return [
++        _PyProtoInfo(
++            imports = depset(
++                # Adding to PYTHONPATH so the generated modules can be
++                # imported.  This is necessary when there is
++                # strip_import_prefix, the Python modules are generated under
++                # _virtual_imports. But it's undesirable otherwise, because it
++                # will put the repo root at the top of the PYTHONPATH, ahead of
++                # directories added through `imports` attributes.
++                [proto_root] if "_virtual_imports" in proto_root else [],
++                transitive = [dep[PyInfo].imports for dep in api_deps] + [dep.imports for dep in deps],
++            ),
++            runfiles_from_proto_deps = runfiles_from_proto_deps,
++            transitive_sources = transitive_sources,
++        ),
++    ]
++
++_py_proto_aspect = aspect(
++    implementation = _py_proto_aspect_impl,
++    attrs = {} if _incompatible_toolchains_enabled() else {
++        "_aspect_proto_toolchain": attr.label(
++            default = "//python:python_toolchain",
++        ),
++    },
++    attr_aspects = ["deps"],
++    required_providers = [ProtoInfo],
++    provides = [_PyProtoInfo],
++    toolchains = [PY_PROTO_TOOLCHAIN] if _incompatible_toolchains_enabled() else [],
++)
++
++def _py_proto_library_rule(ctx):
++    """Merges results of `py_proto_aspect` in `deps`.
++
++    Args:
++      ctx: (RuleContext) The rule context.
++    Returns:
++      ([PyInfo, DefaultInfo, OutputGroupInfo])
++    """
++    if not ctx.attr.deps:
++        fail("'deps' attribute mustn't be empty.")
++
++    pyproto_infos = _filter_provider(_PyProtoInfo, ctx.attr.deps)
++    default_outputs = depset(
++        transitive = [info.transitive_sources for info in pyproto_infos],
++    )
++
++    return [
++        DefaultInfo(
++            files = default_outputs,
++            default_runfiles = ctx.runfiles(transitive_files = depset(
++                transitive =
++                    [default_outputs] +
++                    [info.runfiles_from_proto_deps for info in pyproto_infos],
++            )),
++        ),
++        OutputGroupInfo(
++            default = depset(),
++        ),
++        PyInfo(
++            transitive_sources = default_outputs,
++            imports = depset(transitive = [info.imports for info in pyproto_infos]),
++            # Proto always produces 2- and 3- compatible source files
++            has_py2_only_sources = False,
++            has_py3_only_sources = False,
++        ),
++    ]
++
++py_proto_library = rule(
++    implementation = _py_proto_library_rule,
++    doc = """
++      Use `py_proto_library` to generate Python libraries from `.proto` files.
++
++      The convention is to name the `py_proto_library` rule `foo_py_pb2`,
++      when it is wrapping `proto_library` rule `foo_proto`.
++
++      `deps` must point to a `proto_library` rule.
++
++      Example:
++
++```starlark
++py_library(
++    name = "lib",
++    deps = [":foo_py_pb2"],
++)
++
++py_proto_library(
++    name = "foo_py_pb2",
++    deps = [":foo_proto"],
++)
++
++proto_library(
++    name = "foo_proto",
++    srcs = ["foo.proto"],
++)
++```""",
++    attrs = {
++        "deps": attr.label_list(
++            doc = """
++              The list of `proto_library` rules to generate Python libraries for.
++
++              Usually this is just the one target: the proto library of interest.
++              It can be any target providing `ProtoInfo`.""",
++            providers = [ProtoInfo],
++            aspects = [_py_proto_aspect],
++        ),
++    },
++    provides = [PyInfo],
++)
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/system_python.bzl b/third_party/systemlibs/protobuf_conda_bazel/system_python.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/system_python.bzl
+@@ -0,0 +1,17 @@
++# Copyright (c) 2009-2021, Google LLC
++# All rights reserved.
++#
++# Use of this source code is governed by a BSD-style
++# license that can be found in the LICENSE file or at
++# https://developers.google.com/open-source/licenses/bsd
++
++"""Temporary alias to repository rule for using Python 3.x headers from the system."""
++
++load(
++    "//python/dist:system_python.bzl",
++    _system_python = "system_python",
++)
++
++# TODO: Temporary alias. This is deprecated and to be removed in a future
++# release. Users should now get system_python from protobuf_deps.bzl.
++system_python = _system_python
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/toolchains/BUILD.bazel b/third_party/systemlibs/protobuf_conda_bazel/toolchains/BUILD.bazel
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/toolchains/BUILD.bazel
+@@ -0,0 +1,23 @@
++load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
++
++bzl_library(
++    name = "proto_toolchain_bzl",
++    srcs = [
++        "proto_toolchain.bzl",
++    ],
++    visibility = ["//visibility:public"],
++    deps = [
++        "//bazel/private:proto_toolchain_rule_bzl",
++    ],
++)
++
++bzl_library(
++    name = "proto_lang_toolchain_bzl",
++    srcs = [
++        "proto_lang_toolchain.bzl",
++    ],
++    visibility = ["//visibility:public"],
++    deps = [
++        "//bazel/common:proto_common_bzl",
++    ],
++)
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/toolchains/proto_lang_toolchain.bzl b/third_party/systemlibs/protobuf_conda_bazel/toolchains/proto_lang_toolchain.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/toolchains/proto_lang_toolchain.bzl
+@@ -0,0 +1,34 @@
++"""proto_lang_toolchain rule"""
++
++load("//bazel/common:proto_common.bzl", "proto_common")
++
++def proto_lang_toolchain(*, name, toolchain_type = None, exec_compatible_with = [], target_compatible_with = [], **attrs):
++    """Creates a proto_lang_toolchain and corresponding toolchain target.
++
++    Toolchain target is only created when toolchain_type is set.
++
++    https://docs.bazel.build/versions/master/be/protocol-buffer.html#proto_lang_toolchain
++
++    Args:
++
++      name: name of the toolchain
++      toolchain_type: The toolchain type
++      exec_compatible_with: ([constraints]) List of constraints the prebuild binaries is compatible with.
++      target_compatible_with: ([constraints]) List of constraints the target libraries are compatible with.
++      **attrs: Rule attributes
++    """
++
++    if getattr(proto_common, "INCOMPATIBLE_PASS_TOOLCHAIN_TYPE", False):
++        attrs["toolchain_type"] = toolchain_type
++
++    # buildifier: disable=native-proto
++    native.proto_lang_toolchain(name = name, **attrs)
++
++    if toolchain_type:
++        native.toolchain(
++            name = name + "_toolchain",
++            toolchain_type = toolchain_type,
++            exec_compatible_with = exec_compatible_with,
++            target_compatible_with = target_compatible_with,
++            toolchain = name,
++        )
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/toolchains/proto_toolchain.bzl b/third_party/systemlibs/protobuf_conda_bazel/toolchains/proto_toolchain.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/toolchains/proto_toolchain.bzl
+@@ -0,0 +1,26 @@
++"""Macro wrapping the proto_toolchain implementation.
++
++The macro additionally creates toolchain target when toolchain_type is given.
++"""
++
++load("//bazel/private:proto_toolchain_rule.bzl", _proto_toolchain_rule = "proto_toolchain")
++
++def proto_toolchain(*, name, proto_compiler, exec_compatible_with = []):
++    """Creates a proto_toolchain and toolchain target for proto_library.
++
++    Toolchain target is suffixed with "_toolchain".
++
++    Args:
++      name: name of the toolchain
++      proto_compiler: (Label) of either proto compiler sources or prebuild binaries
++      exec_compatible_with: ([constraints]) List of constraints the prebuild binary is compatible with.
++    """
++    _proto_toolchain_rule(name = name, proto_compiler = proto_compiler)
++
++    native.toolchain(
++        name = name + "_toolchain",
++        toolchain_type = "@rules_proto//proto:toolchain_type",
++        exec_compatible_with = exec_compatible_with,
++        target_compatible_with = [],
++        toolchain = name,
++    )
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/upb_c_proto_library.bzl b/third_party/systemlibs/protobuf_conda_bazel/upb_c_proto_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/upb_c_proto_library.bzl
+@@ -0,0 +1,70 @@
++"""upb_c_proto_library() exposes upb's generated C API for protobuf (foo.upb.h)"""
++
++load("//bazel:upb_minitable_proto_library.bzl", "UpbMinitableCcInfo", "upb_minitable_proto_library_aspect")
++load("//bazel/common:proto_info.bzl", "ProtoInfo")
++load("//bazel/private:upb_proto_library_internal/aspect.bzl", "upb_proto_aspect_impl")
++load("//bazel/private:upb_proto_library_internal/cc_library_func.bzl", "upb_use_cpp_toolchain")
++load("//bazel/private:upb_proto_library_internal/rule.bzl", "upb_proto_rule_impl")
++
++UpbWrappedCcInfo = provider(
++    "Provider for cc_info for protos",
++    fields = ["cc_info", "cc_info_with_thunks"],
++)
++
++_UpbWrappedGeneratedSrcsInfo = provider(
++    "Provider for generated sources",
++    fields = ["srcs"],
++)
++
++def _upb_c_proto_library_aspect_impl(target, ctx):
++    return upb_proto_aspect_impl(
++        target = target,
++        ctx = ctx,
++        generator = "upb",
++        cc_provider = UpbWrappedCcInfo,
++        dep_cc_provider = UpbMinitableCcInfo,
++        file_provider = _UpbWrappedGeneratedSrcsInfo,
++        provide_cc_shared_library_hints = False,
++    )
++
++upb_c_proto_library_aspect = aspect(
++    attrs = {
++        "_copts": attr.label(
++            default = "//upb:upb_proto_library_copts__for_generated_code_only_do_not_use",
++        ),
++        "_upb_toolchain": attr.label(
++            default = Label("//upb_generator:protoc-gen-upb_toolchain"),
++        ),
++        "_cc_toolchain": attr.label(
++            default = "@bazel_tools//tools/cpp:current_cc_toolchain",
++        ),
++    },
++    implementation = _upb_c_proto_library_aspect_impl,
++    requires = [upb_minitable_proto_library_aspect],
++    required_aspect_providers = [UpbMinitableCcInfo],
++    provides = [
++        UpbWrappedCcInfo,
++        _UpbWrappedGeneratedSrcsInfo,
++    ],
++    attr_aspects = ["deps"],
++    fragments = ["cpp"],
++    toolchains = upb_use_cpp_toolchain(),
++    exec_groups = {
++        "proto_compiler": exec_group(),
++    },
++)
++
++def _upb_c_proto_library_rule_impl(ctx):
++    return upb_proto_rule_impl(ctx, UpbWrappedCcInfo, _UpbWrappedGeneratedSrcsInfo)
++
++upb_c_proto_library = rule(
++    implementation = _upb_c_proto_library_rule_impl,
++    attrs = {
++        "deps": attr.label_list(
++            aspects = [upb_c_proto_library_aspect],
++            allow_rules = ["proto_library"],
++            providers = [ProtoInfo],
++        ),
++    },
++    provides = [CcInfo],
++)
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/upb_minitable_proto_library.bzl b/third_party/systemlibs/protobuf_conda_bazel/upb_minitable_proto_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/upb_minitable_proto_library.bzl
+@@ -0,0 +1,78 @@
++"""upb_minitable_proto_library() exposes upb's generated minitables (foo.upb_minitable.h)"""
++
++load("//bazel/common:proto_info.bzl", "ProtoInfo")
++load("//bazel/private:upb_proto_library_internal/aspect.bzl", "upb_proto_aspect_impl")
++load("//bazel/private:upb_proto_library_internal/cc_library_func.bzl", "upb_use_cpp_toolchain")
++load("//bazel/private:upb_proto_library_internal/rule.bzl", "upb_proto_rule_impl")
++
++UpbMinitableCcInfo = provider(
++    "Provider for cc_info for protos",
++    fields = ["cc_info"],
++)
++
++_UpbWrappedGeneratedSrcsInfo = provider(
++    "Provider for generated sources",
++    fields = ["srcs"],
++)
++
++def _upb_minitable_proto_library_aspect_impl(target, ctx):
++    return upb_proto_aspect_impl(
++        target = target,
++        ctx = ctx,
++        generator = "upb_minitable",
++        cc_provider = UpbMinitableCcInfo,
++        dep_cc_provider = None,
++        file_provider = _UpbWrappedGeneratedSrcsInfo,
++    )
++
++def _get_upb_minitable_proto_library_aspect_provides():
++    provides = [
++        UpbMinitableCcInfo,
++        _UpbWrappedGeneratedSrcsInfo,
++    ]
++
++    if hasattr(cc_common, "CcSharedLibraryHintInfo"):
++        provides.append(cc_common.CcSharedLibraryHintInfo)
++    elif hasattr(cc_common, "CcSharedLibraryHintInfo_6_X_getter_do_not_use"):
++        # This branch can be deleted once 6.X is not supported by upb rules
++        provides.append(cc_common.CcSharedLibraryHintInfo_6_X_getter_do_not_use)
++
++    return provides
++
++upb_minitable_proto_library_aspect = aspect(
++    attrs = {
++        "_copts": attr.label(
++            default = "//upb:upb_proto_library_copts__for_generated_code_only_do_not_use",
++        ),
++        "_upb_minitable_toolchain": attr.label(
++            default = Label("//upb_generator:protoc-gen-upb_minitable_toolchain"),
++        ),
++        "_cc_toolchain": attr.label(
++            default = "@bazel_tools//tools/cpp:current_cc_toolchain",
++        ),
++        "_fasttable_enabled": attr.label(default = "//upb:fasttable_enabled"),
++    },
++    implementation = _upb_minitable_proto_library_aspect_impl,
++    provides = _get_upb_minitable_proto_library_aspect_provides(),
++    attr_aspects = ["deps"],
++    fragments = ["cpp"],
++    toolchains = upb_use_cpp_toolchain(),
++    exec_groups = {
++        "proto_compiler": exec_group(),
++    },
++)
++
++def _upb_minitable_proto_library_rule_impl(ctx):
++    return upb_proto_rule_impl(ctx, UpbMinitableCcInfo, _UpbWrappedGeneratedSrcsInfo)
++
++upb_minitable_proto_library = rule(
++    implementation = _upb_minitable_proto_library_rule_impl,
++    attrs = {
++        "deps": attr.label_list(
++            aspects = [upb_minitable_proto_library_aspect],
++            allow_rules = ["proto_library"],
++            providers = [ProtoInfo],
++        ),
++    },
++    provides = [CcInfo],
++)
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/upb_proto_library.bzl b/third_party/systemlibs/protobuf_conda_bazel/upb_proto_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/upb_proto_library.bzl
+@@ -0,0 +1,35 @@
++# Copyright (c) 2009-2021, Google LLC
++# All rights reserved.
++#
++# Use of this source code is governed by a BSD-style
++# license that can be found in the LICENSE file or at
++# https://developers.google.com/open-source/licenses/bsd
++
++"""Public rules for using upb protos:
++  - upb_proto_library()
++  - upb_proto_reflection_library()
++"""
++
++load(
++    "//bazel:upb_c_proto_library.bzl",
++    _UpbWrappedCcInfo = "UpbWrappedCcInfo",
++    _upb_c_proto_library = "upb_c_proto_library",
++    _upb_c_proto_library_aspect = "upb_c_proto_library_aspect",
++)
++load(
++    "//bazel:upb_proto_reflection_library.bzl",
++    _upb_proto_reflection_library = "upb_proto_reflection_library",
++)
++load(
++    "//bazel/private:upb_proto_library_internal/aspect.bzl",
++    _GeneratedSrcsInfo = "GeneratedSrcsInfo",
++)
++
++# Temporary alias, see b/291827469.
++upb_proto_library = _upb_c_proto_library
++
++upb_c_proto_library = _upb_c_proto_library
++upb_proto_reflection_library = _upb_proto_reflection_library
++GeneratedSrcsInfo = _GeneratedSrcsInfo
++UpbWrappedCcInfo = _UpbWrappedCcInfo
++upb_proto_library_aspect = _upb_c_proto_library_aspect
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/upb_proto_reflection_library.bzl b/third_party/systemlibs/protobuf_conda_bazel/upb_proto_reflection_library.bzl
+new file mode 100644
+index 00000000000..11111111111
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/upb_proto_reflection_library.bzl
+@@ -0,0 +1,69 @@
++"""upb_c_proto_reflection_library() exposes upb reflection for protobuf (foo.upbdefs.h)"""
++
++load("//bazel:upb_minitable_proto_library.bzl", "UpbMinitableCcInfo", "upb_minitable_proto_library_aspect")
++load("//bazel/common:proto_common.bzl", "proto_common")
++load("//bazel/common:proto_info.bzl", "ProtoInfo")
++load("//bazel/private:upb_proto_library_internal/aspect.bzl", "upb_proto_aspect_impl")
++load("//bazel/private:upb_proto_library_internal/cc_library_func.bzl", "upb_use_cpp_toolchain")
++load("//bazel/private:upb_proto_library_internal/rule.bzl", "upb_proto_rule_impl")
++
++_UpbDefsWrappedCcInfo = provider("Provider for cc_info for protos", fields = ["cc_info"])
++
++_WrappedDefsGeneratedSrcsInfo = provider(
++    "Provider for generated reflective sources",
++    fields = ["srcs"],
++)
++
++def _upb_proto_reflection_library_aspect_impl(target, ctx):
++    return upb_proto_aspect_impl(
++        target = target,
++        ctx = ctx,
++        generator = "upbdefs",
++        cc_provider = _UpbDefsWrappedCcInfo,
++        dep_cc_provider = UpbMinitableCcInfo,
++        file_provider = _WrappedDefsGeneratedSrcsInfo,
++        provide_cc_shared_library_hints = False,
++    )
++
++_upb_proto_reflection_library_aspect = aspect(
++    attrs = {
++        "_copts": attr.label(
++            default = "//upb:upb_proto_library_copts__for_generated_code_only_do_not_use",
++        ),
++        "_upbdefs_toolchain": attr.label(
++            default = Label("//upb_generator:protoc-gen-upbdefs_toolchain"),
++            cfg = getattr(proto_common, "proto_lang_toolchain_cfg", "target"),
++        ),
++        "_cc_toolchain": attr.label(
++            default = "@bazel_tools//tools/cpp:current_cc_toolchain",
++        ),
++    },
++    implementation = _upb_proto_reflection_library_aspect_impl,
++    requires = [upb_minitable_proto_library_aspect],
++    required_aspect_providers = [UpbMinitableCcInfo],
++    provides = [
++        _UpbDefsWrappedCcInfo,
++        _WrappedDefsGeneratedSrcsInfo,
++    ],
++    attr_aspects = ["deps"],
++    fragments = ["cpp"],
++    toolchains = upb_use_cpp_toolchain(),
++    exec_groups = {
++        "proto_compiler": exec_group(),
++    },
++)
++
++def _upb_proto_reflection_library_rule_impl(ctx):
++    return upb_proto_rule_impl(ctx, _UpbDefsWrappedCcInfo, _WrappedDefsGeneratedSrcsInfo)
++
++upb_proto_reflection_library = rule(
++    implementation = _upb_proto_reflection_library_rule_impl,
++    attrs = {
++        "deps": attr.label_list(
++            aspects = [_upb_proto_reflection_library_aspect],
++            allow_rules = ["proto_library"],
++            providers = [ProtoInfo],
++        ),
++    },
++    provides = [CcInfo],
++)
+
+diff --git a/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/BUILD.bazel b/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/BUILD.bazel
+new file mode 100644
+index 00000000000..a1b2c3d4e5f
+--- /dev/null
++++ b/third_party/systemlibs/protobuf_conda_bazel/private/upb_proto_library_internal/BUILD.bazel
+@@ -0,0 +1,2 @@
++package(default_visibility = ["//visibility:public"])
++exports_files(["aspect.bzl", "cc_library_func.bzl", "copts.bzl", "rule.bzl"])

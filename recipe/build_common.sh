@@ -174,13 +174,18 @@ if [[ "${target_platform}" == "osx-64" ]]; then
   export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
 elif [[ "${target_platform}" == "linux-aarch64" ]]; then
   TARGET_CPU=aarch64
-elif [[ "${target_platform}" == "linux-x86_64" ]]; then
-  TARGET_CPU=x86_64
+elif [[ "${target_platform}" == "linux-64" || "${target_platform}" == "linux-x86_64" ]]; then
+  TARGET_CPU=k8
 fi
 
-# Get rid of unwanted defaults
-sed -i -e "/PROTOBUF_INCLUDE_PATH/c\ " .bazelrc
-sed -i -e "/PREFIX/c\ " .bazelrc
+sed -i -e '/^build:linux --define=PREFIX=/d' .bazelrc
+sed -i -e '/^build:linux --define=PROTOBUF_INCLUDE_PATH=/d' .bazelrc
+sed -i -e '/^build:macos --define=PREFIX=/d' .bazelrc
+sed -i -e '/^build:macos --define=PROTOBUF_INCLUDE_PATH=/d' .bazelrc
+bazel_version_line=$(bazel --version 2>/dev/null || echo "")
+if [[ "${bazel_version_line}" == bazel\ 8* ]]; then
+  sed -i 's/--experimental_guard_against_concurrent_changes/--guard_against_concurrent_changes/g' .bazelrc
+fi
 # Ensure .bazelrc ends in a newline
 echo "" >> .bazelrc
 
@@ -190,7 +195,7 @@ if [[ "${target_platform}" == "osx-arm64" ]]; then
   export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
 fi
 export TF_ENABLE_XLA=1
-export BUILD_TARGET="//tensorflow/tools/pip_package:wheel //tensorflow/tools/lib_package:libtensorflow //tensorflow:libtensorflow_cc${SHLIB_EXT}"
+export BUILD_TARGET="//tensorflow/tools/pip_package:wheel //tensorflow:tensorflow_cc"
 
 # Python settings
 export PYTHON_BIN_PATH=${PYTHON}
@@ -218,6 +223,8 @@ export TF_CONFIGURE_IOS=0
 
 ./configure
 
+sed -i '/repo_env=USE_PYWRAP_RULES=True/d' .bazelrc
+
 # Remove legacy flags set by configure that conflicts with CUDA 12's multi-directory approach.
 if [[ "${cuda_compiler_version}" == 12* ]]; then
     sed -i '/CUDA_TOOLKIT_PATH/d' .tf_configure.bazelrc
@@ -227,16 +234,46 @@ if [[ "${build_platform}" == linux-* ]]; then
   $RECIPE_DIR/add_py_toolchain.sh
 fi
 
+if [[ "${bazel_version_line}" == bazel\ 8* ]] && ! grep -qF 'common --enable_workspace' .bazelrc; then
+  echo "common --enable_workspace" >> .bazelrc
+fi
+
+if ! grep -qF 'crosstool_top=//bazel_toolchain:toolchain' .bazelrc; then
 cat >> .bazelrc <<EOF
 build --crosstool_top=//bazel_toolchain:toolchain
 build --@local_config_cuda//cuda:override_include_cuda_libs=true
 build --logging=6
 build --verbose_failures
-build --define=PREFIX=${PREFIX}
-build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
 build --cpu=${TARGET_CPU}
-build --local_cpu_resources=${CPU_COUNT}
+build --local_resources=cpu=${CPU_COUNT}
 EOF
+fi
+
+sed -i '/^build --define=PREFIX=/d' .bazelrc
+sed -i '/^build --define=PROTOBUF_INCLUDE_PATH=/d' .bazelrc
+echo "build --define=PREFIX=${PREFIX}" >> .bazelrc
+echo "build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include" >> .bazelrc
+
+if [[ "${target_platform}" == linux-* ]] && ! grep -qF 'host_linkopt=-lsnappy' .bazelrc; then
+  echo "build --host_linkopt=-Wl,--push-state" >> .bazelrc
+  echo "build --host_linkopt=-Wl,--no-as-needed" >> .bazelrc
+  echo "build --host_linkopt=-lsnappy" >> .bazelrc
+  echo "build --host_linkopt=-Wl,--pop-state" >> .bazelrc
+  echo "build --linkopt=-Wl,--push-state" >> .bazelrc
+  echo "build --linkopt=-Wl,--no-as-needed" >> .bazelrc
+  echo "build --linkopt=-lsnappy" >> .bazelrc
+  echo "build --linkopt=-Wl,--pop-state" >> .bazelrc
+fi
+if [[ "${target_platform}" == linux-* ]] && ! grep -qF 'host_linkopt=-lcurl' .bazelrc; then
+  echo "build --host_linkopt=-Wl,--push-state" >> .bazelrc
+  echo "build --host_linkopt=-Wl,--no-as-needed" >> .bazelrc
+  echo "build --host_linkopt=-lcurl" >> .bazelrc
+  echo "build --host_linkopt=-Wl,--pop-state" >> .bazelrc
+  echo "build --linkopt=-Wl,--push-state" >> .bazelrc
+  echo "build --linkopt=-Wl,--no-as-needed" >> .bazelrc
+  echo "build --linkopt=-lcurl" >> .bazelrc
+  echo "build --linkopt=-Wl,--pop-state" >> .bazelrc
+fi
 
 # Update TF lite schema with latest flatbuffers version
 pushd tensorflow/compiler/mlir/lite/schema
@@ -247,7 +284,11 @@ rm -f tensorflow/lite/experimental/acceleration/configuration/configuration_gene
 rm -f tensorflow/lite/acceleration/configuration/configuration_generated.h
 sed -ie "s;BUILD_PREFIX;${BUILD_PREFIX};g" tensorflow/tools/pip_package/build_pip_package.py
 
-# build using bazel
+if [[ "${TF_CONDA_FETCH_ONLY:-}" == "1" ]]; then
+  bazel ${BAZEL_OPTS} build --nobuild ${BUILD_TARGET}
+  exit 0
+fi
+
 bazel ${BAZEL_OPTS} build ${BUILD_TARGET}
 
 # build a whl file
@@ -258,18 +299,39 @@ cp $whl $SRC_DIR/tensorflow_pkg/$(basename ${whl} | sed s@cp${cp_ver}@cp${PY_VER
 
 if [[ ! -f "${SRC_DIR}/libtensorflow_cc_output.tar" ]]; then
   # Build libtensorflow(_cc)
-  cp $SRC_DIR/bazel-bin/tensorflow/tools/lib_package/libtensorflow.tar.gz $SRC_DIR
-  mkdir -p $SRC_DIR/libtensorflow_cc_output/lib
-  if [[ "${target_platform}" == osx-* ]]; then
-    cp -RP bazel-bin/tensorflow/libtensorflow_cc.* $SRC_DIR/libtensorflow_cc_output/lib/
-    cp -RP bazel-bin/tensorflow/libtensorflow_framework.* $SRC_DIR/libtensorflow_cc_output/lib/
-  else
-    cp -d bazel-bin/tensorflow/libtensorflow_cc.so* $SRC_DIR/libtensorflow_cc_output/lib/
-    cp -d bazel-bin/tensorflow/libtensorflow_framework.so* $SRC_DIR/libtensorflow_cc_output/lib/
-    cp -d $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so.2 $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so
+  clib_tgz=$SRC_DIR/bazel-bin/tensorflow/tools/lib_package/clib.tar.gz
+  clib_tar=$SRC_DIR/bazel-bin/tensorflow/tools/lib_package/clib.tar
+  if [[ -f "$clib_tgz" ]]; then
+    cp "$clib_tgz" $SRC_DIR/libtensorflow.tar.gz
+  elif [[ -f "$clib_tar" ]]; then
+    gzip -nc "$clib_tar" > $SRC_DIR/libtensorflow.tar.gz
   fi
-  # Make writable so patchelf can do its magic
-  chmod u+w $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow*
+  mkdir -p $SRC_DIR/libtensorflow_cc_output/lib
+  shopt -s nullglob
+  if [[ "${target_platform}" == osx-* ]]; then
+    cc_mac=(bazel-bin/tensorflow/libtensorflow_cc.*)
+    fw_mac=(bazel-bin/tensorflow/libtensorflow_framework.*)
+    shopt -u nullglob
+    if [[ ${#cc_mac[@]} -eq 0 || ${#fw_mac[@]} -eq 0 ]]; then
+      exit 1
+    fi
+    cp -RP "${cc_mac[@]}" $SRC_DIR/libtensorflow_cc_output/lib/
+    cp -RP "${fw_mac[@]}" $SRC_DIR/libtensorflow_cc_output/lib/
+  else
+    cc_so=(bazel-bin/tensorflow/libtensorflow_cc.so*)
+    fw_so=(bazel-bin/tensorflow/libtensorflow_framework.so*)
+    shopt -u nullglob
+    if [[ ${#cc_so[@]} -eq 0 || ${#fw_so[@]} -eq 0 ]]; then
+      exit 1
+    fi
+    cp -d "${cc_so[@]}" $SRC_DIR/libtensorflow_cc_output/lib/
+    cp -d "${fw_so[@]}" $SRC_DIR/libtensorflow_cc_output/lib/
+    framework_soname=$SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so.2
+    if [[ -e "$framework_soname" ]]; then
+      cp -d "$framework_soname" $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so
+    fi
+  fi
+  find $SRC_DIR/libtensorflow_cc_output/lib -maxdepth 1 -name 'libtensorflow*' -exec chmod u+w {} +
 
   mkdir -p $SRC_DIR/libtensorflow_cc_output/include/tensorflow
   rsync -r --chmod=D777,F666 --exclude '_solib*' --exclude '_virtual_includes/' --exclude 'pip_package/' --exclude 'lib_package/' --include '*/' --include '*.h' --include '*.inc' --exclude '*' bazel-bin/ $SRC_DIR/libtensorflow_cc_output/include
@@ -277,8 +339,18 @@ if [[ ! -f "${SRC_DIR}/libtensorflow_cc_output.tar" ]]; then
   rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/core $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
   rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' third_party/xla/third_party/tsl/ $SRC_DIR/libtensorflow_cc_output/include/
   rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.cc' third_party/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/
-  rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/Eigen/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/Eigen/
-  rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/unsupported/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/unsupported/
+  bazel_output_base_for_eigen=$(bazel ${BAZEL_OPTS} info output_base)
+  eigen_archive_root=""
+  if [[ -d "${bazel_output_base_for_eigen}/external/eigen_archive" ]]; then
+    eigen_archive_root="${bazel_output_base_for_eigen}/external/eigen_archive"
+  elif [[ -d bazel-work/external/eigen_archive ]]; then
+    eigen_archive_root=bazel-work/external/eigen_archive
+  fi
+  if [[ -z "$eigen_archive_root" ]]; then
+    exit 1
+  fi
+  rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' "${eigen_archive_root}/Eigen/" $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/Eigen/
+  rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' "${eigen_archive_root}/unsupported/" $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/unsupported/
   pushd $SRC_DIR/libtensorflow_cc_output
     tar cf ../libtensorflow_cc_output.tar .
   popd

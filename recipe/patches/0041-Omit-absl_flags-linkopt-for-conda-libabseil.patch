@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mark Harfouche <mark.harfouche@gmail.com>
+Date: Sat, 22 Mar 2026 00:00:00 +0000
+Subject: [PATCH] Omit -labsl_flags for conda libabseil
+
+conda-forge libabseil installs libabsl_flags_*.so shards but not
+libabsl_flags.so; //absl/flags:flag deps already pull the needed libs.
+Fixes linking _pywrap_profiler_plugin.so (undefined -labsl_flags).
+---
+ third_party/xla/third_party/absl/system.absl.flags.BUILD | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/third_party/xla/third_party/absl/system.absl.flags.BUILD b/third_party/xla/third_party/absl/system.absl.flags.BUILD
+index 1111111111..2222222222 100644
+--- a/third_party/xla/third_party/absl/system.absl.flags.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.flags.BUILD
+@@ -97,7 +97,6 @@ cc_library(
+ 
+ cc_library(
+     name = "flag",
+-    linkopts = ["-labsl_flags"],
+     deps = [
+         ":config",
+         ":flag_internal",

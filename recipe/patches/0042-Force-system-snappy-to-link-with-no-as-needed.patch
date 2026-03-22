@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mark Harfouche <mark.harfouche@gmail.com>
+Date: Sat, 22 Mar 2026 00:00:00 +0000
+Subject: [PATCH] Force -lsnappy with --no-as-needed for conda linkers
+
+Conda toolchains often pass -Wl,--as-needed, which drops DT_NEEDED for
+libsnappy when only indirect C++/RTTI references remain. Genrule host
+tools then load libtensorflow_framework.so and fail with undefined
+_ZTIN6snappy4SinkE.
+---
+ third_party/systemlibs/snappy.BUILD | 6 +++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/third_party/systemlibs/snappy.BUILD b/third_party/systemlibs/snappy.BUILD
+index 1111111111..2222222222 100644
+--- a/third_party/systemlibs/snappy.BUILD
++++ b/third_party/systemlibs/snappy.BUILD
+@@ -8,5 +8,10 @@ cc_library(
+ cc_library(
+     name = "snappy",
+-    linkopts = ["-lsnappy"],
++    linkopts = [
++        "-Wl,--push-state",
++        "-Wl,--no-as-needed",
++        "-lsnappy",
++        "-Wl,--pop-state",
++    ],
+     visibility = ["//visibility:public"],
+ )

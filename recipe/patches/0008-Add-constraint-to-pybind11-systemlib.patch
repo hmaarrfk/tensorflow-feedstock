@@ -3,21 +3,28 @@ From: "Uwe L. Korn" <uwe.korn@quantco.com>
 Date: Fri, 27 Oct 2023 11:20:12 +0200
 Subject: [PATCH 08/31] Add constraint to pybind11 systemlib
 
+TF 2.20 uses @xla@local_xla (invalid under Bazel 7); use @local_xla.
 ---
- third_party/systemlibs/pybind11.BUILD | 6 ++++++
- 1 file changed, 6 insertions(+)
+ third_party/systemlibs/pybind11.BUILD | 8 ++++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/third_party/systemlibs/pybind11.BUILD b/third_party/systemlibs/pybind11.BUILD
 index 6579133497d..66fee809387 100644
 --- a/third_party/systemlibs/pybind11.BUILD
 +++ b/third_party/systemlibs/pybind11.BUILD
-@@ -6,3 +6,9 @@ cc_library(
-         "@xla@local_xla//third_party/python_runtime:headers",
+@@ -1,8 +1,13 @@
+ package(default_visibility = ["//visibility:public"])
+ 
+ cc_library(
+     name = "pybind11",
+     deps = [
+-        "@xla@local_xla//third_party/python_runtime:headers",
++        "@local_xla//third_party/python_runtime:headers",
      ],
  )
-+
 +# Needed by pybind11_bazel.
 +config_setting(
 +    name = "osx",
 +    constraint_values = ["@platforms//os:osx"],
 +)
+
